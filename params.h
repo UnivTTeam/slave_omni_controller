@@ -21,6 +21,9 @@ inline const Transform::StaticTransform<float> lf_frame(0.0f, 0.0f, M_PI / 2);
 inline const Transform::StaticTransform<float> lb_frame(0.0f, 0.0f, M_PI / 2);
 inline const Transform::StaticTransform<float> rb_frame(0.0f, 0.0f, M_PI / 2);
 inline const Transform::StaticTransform<float> rf_frame(0.0f, 0.0f, M_PI / 2);
+
+// 制御パラメタ
+inline const float WheeFeedbackKp = 4.0f;
 }
 
 #define ENC_LF 13

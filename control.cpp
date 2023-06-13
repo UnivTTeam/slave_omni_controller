@@ -15,7 +15,8 @@ int wheel_controller(
       float angular_vel)
 {
   float dest_angular_vel = dest_vel / (Params::wheel_R * Params::gear_d);
-  return dest_angular_vel;
+  float angular_vel_error = angular_vel - dest_angular_vel;
+  return dest_angular_vel + (-Params::WheeFeedbackKp) * angular_vel_error;
 }
 
 std::array<float, 4> VOConv(float vx, float vy, float omega) {

@@ -11,11 +11,15 @@
 
 #define MAX_PWM 250
 
-int clipPwm(int pwm)
+int clipPwm(int pwm, bool reverse)
 {
     pwm = max(pwm, -MAX_PWM);
     pwm = min(pwm, MAX_PWM);
-    return pwm;
+    if(reverse){
+      return -pwm;
+    }else{
+      return pwm;
+    }
 }
 
 //モーター系
@@ -141,7 +145,7 @@ void setupDevice() {
 void send_pwm(){
   using namespace CommandValue;
 
-  LF_pwm = clipPwm(LF_pwm);
+  LF_pwm = clipPwm(LF_pwm, Params::reverse_wheel[0]);
   if(LF_pwm >=0){
     pwm[0]=LF_pwm;
     pwm[1]=0;
@@ -151,7 +155,7 @@ void send_pwm(){
     pwm[1]=-LF_pwm;
   }
   
-  LB_pwm = clipPwm(LB_pwm);
+  LB_pwm = clipPwm(LB_pwm, Params::reverse_wheel[1]);
   if(LB_pwm >=0){
     pwm[2]=LB_pwm;
     pwm[3]=0;
@@ -161,7 +165,7 @@ void send_pwm(){
     pwm[3]=-LB_pwm;
   }
   
-  RB_pwm = clipPwm(RB_pwm);
+  RB_pwm = clipPwm(RB_pwm, Params::reverse_wheel[2]);
   if(RB_pwm >=0){
     pwm[4]=RB_pwm;
     pwm[5]=0;
@@ -171,7 +175,7 @@ void send_pwm(){
     pwm[5]=-RB_pwm;
   }
   
-  RF_pwm = clipPwm(RF_pwm);
+  RF_pwm = clipPwm(RF_pwm, Params::reverse_wheel[3]);
   if(RF_pwm >=0){
     pwm[6]=RF_pwm;
     pwm[7]=0;

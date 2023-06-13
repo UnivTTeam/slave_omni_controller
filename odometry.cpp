@@ -1,22 +1,33 @@
+#include <Wire.h>
+
+#include "device.h"
+#include "params.h"
+
+using namespace SensorRawValue;
+using namespace SensorValue;
+using Params::enc_cycle, Params::gear_d, Params::control_interval_sec;
+
+#define enc_lowpass 0.8  //for enc to wheelangularvel lowpass
+
 void calc_wheel_ang_vel(){
   float LF_enc_diff = m_nValue_LF;
   m_nValue_LF = 0;
-  float LF_a = LF_enc_diff / enc_cycle / gear_d * 2 * PI / dt * 1000000;
+  float LF_a = LF_enc_diff / enc_cycle / gear_d * 2 * M_PI / control_interval_sec;
   angular_LF = enc_lowpass * angular_LF + (1-enc_lowpass) * LF_a;
   
   float LB_enc_diff = m_nValue_LB;
   m_nValue_LB = 0;
-  float LB_a = LB_enc_diff / enc_cycle / gear_d * 2 * PI / dt * 1000000;
+  float LB_a = LB_enc_diff / enc_cycle / gear_d * 2 * M_PI / control_interval_sec;
   angular_LB = enc_lowpass * angular_LB + (1-enc_lowpass) * LB_a;
  
   float RB_enc_diff = m_nValue_RB;
   m_nValue_RB = 0;
-  float RB_a = RB_enc_diff / enc_cycle / gear_d * 2 * PI / dt * 1000000;
+  float RB_a = RB_enc_diff / enc_cycle / gear_d * 2 * M_PI / control_interval_sec;
   angular_RB = enc_lowpass * angular_RB + (1-enc_lowpass) * RB_a;
 
   float RF_enc_diff = m_nValue_RF;
   m_nValue_RF = 0;
-  float RF_a = RF_enc_diff / enc_cycle / gear_d * 2 * PI / dt * 1000000;
+  float RF_a = RF_enc_diff / enc_cycle / gear_d * 2 * M_PI / control_interval_sec;
   angular_RF = enc_lowpass * angular_RF + (1-enc_lowpass) * RF_a;
   
 //  Serial.print("angular_LF");

@@ -17,10 +17,10 @@ inline const float max_angular_vel = 6.0f*M_PI ;//車輪の最大角速度
 inline const float max_wheel_vel = max_angular_vel * wheel_R;
 
 // マシン座標上のタイヤ位置(x, y, theta)
-inline const Transform::StaticTransform<float> lf_frame(0.0f, 0.0f, M_PI / 2);
-inline const Transform::StaticTransform<float> lb_frame(0.0f, 0.0f, M_PI / 2);
-inline const Transform::StaticTransform<float> rb_frame(0.0f, 0.0f, M_PI / 2);
-inline const Transform::StaticTransform<float> rf_frame(0.0f, 0.0f, M_PI / 2);
+inline const Transform::StaticTransform<float> lf_frame( 250.0f,  250.0f, 0.75 * M_PI);
+inline const Transform::StaticTransform<float> lf_frame(-250.0f,  250.0f,-0.75 * M_PI);
+inline const Transform::StaticTransform<float> lf_frame(-250.0f, -250.0f,-0.25 * M_PI);
+inline const Transform::StaticTransform<float> lf_frame( 250.0f, -250.0f, 0.25 * M_PI);
 
 // 制御パラメタ
 inline const float WheeFeedbackKp = 4.0f;

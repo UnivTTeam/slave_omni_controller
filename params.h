@@ -29,6 +29,10 @@ inline const std::array<bool, 4> reverse_wheel{false, false, false, false};
 
 // 制御パラメタ
 inline const float WheeFeedbackKp = 4.0f;
+
+// 通信パラメタ：親機と子機で同期する
+inline const float MAX_PARA_VEL = 5.0f;
+inline const float MAX_ROT_VEL = 5.0f;
 }
 
 #define ENC_LF 13

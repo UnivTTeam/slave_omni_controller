@@ -2,14 +2,15 @@
 
 #include "wire_control.h"
 #include "device.h"
+#include "params.h"
 
 void receiveEvent(int cnt)
 {
   using namespace TargetValue;
   if(Wire.available()>1){
-    vel_x = Wire.read();
-    vel_y = Wire.read();
-    angular_vel = Wire.read();
+    vel_x = Wire.read() * Params::MAX_PARA_VEL;
+    vel_y = Wire.read() * Params::MAX_PARA_VEL;
+    angular_vel = Wire.read() * Params::MAX_ROT_VEL;
     master_status = Wire.read();
   }
 }

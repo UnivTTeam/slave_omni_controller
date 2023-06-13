@@ -9,10 +9,9 @@
 #define IDC 23
 #define OMNI_ID 0x34
 
-#define MAX_PWM 250
-
 int clipPwm(int pwm, bool reverse)
 {
+    using Params::MAX_PWM;
     pwm = max(pwm, -MAX_PWM);
     pwm = min(pwm, MAX_PWM);
     if(reverse){

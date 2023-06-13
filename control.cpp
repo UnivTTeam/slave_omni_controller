@@ -14,9 +14,12 @@ int wheel_controller(
       const Transform::StaticTransform<float>& wheel_frame,
       float angular_vel)
 {
-  float dest_angular_vel = dest_vel / (Params::wheel_R * Params::gear_d);
+  float dest_angular_vel = dest_vel / Params::wheel_Reff;
   float angular_vel_error = angular_vel - dest_angular_vel;
-  return dest_angular_vel + (-Params::WheeFeedbackKp) * angular_vel_error;
+
+  float omega = dest_angular_vel + (-Params::WheeFeedbackKp) * angular_vel_error;
+  float pwm = Params::MAX_PWM * (omega / Params::max_angular_vel);
+  return pwm;
 }
 
 std::array<float, 4> VOConv(float vx, float vy, float omega) {
@@ -52,11 +55,11 @@ std::array<float, 4> controller_impl(const std::array<float, 4>& angular_wheels)
   }
   
   std::array<float, 4> v = VOConv(ratio * vel_x, ratio * vel_y, angular_vel);
-  std::array<float, 4> ret;
+  std::array<float, 4> pwms;
   for(int i=0; i<4; i++){
-    ret[i] = wheel_controller(v[i], wheel_frames[i], angular_wheels[i]);
+    pwms[i] = wheel_controller(v[i], wheel_frames[i], angular_wheels[i]);
   }
-  return ret;
+  return pwms;
 }
 
 void control() {

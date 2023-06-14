@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "control.h"
 #include "params.h"
 #include "device.h"
@@ -65,7 +67,15 @@ std::array<float, 4> controller_impl(const std::array<float, 4>& angular_wheels)
 void control() {
   using namespace SensorValue;
 
-  std::array<float, 4> pwms = controller_impl(std::array<float, 4>{angular_LF, angular_LB, angular_RB, angular_RF});
+  std::array<float, 4> angulars{angular_LF, angular_LB, angular_RB, angular_RF};
+  std::array<float, 4> pwms = controller_impl(angulars);
+  
+  static std::array<float, 4> thetas{0.0f, 0.0f, 0.0f, 0.0f};
+  for(int i=0; i<4; i++){
+    thetas[i] += angulars[i] * Params::control_interval_sec;
+    Serial.printf("%f ", thetas[i]);
+  }
+  Serial.printf("\n");
 
   CommandValue::LF_pwm = pwms[0];
   CommandValue::LB_pwm = pwms[1];

@@ -85,10 +85,11 @@ volatile int slave_status = 0;//本機の状態
 float pos_x = 0;//m
 float pos_y = 0;//m
 float yaw = 0;//rad
+
 namespace TargetValue{
-volatile float vel_x = 138;
-volatile float vel_y = 128;
-volatile float angular_vel = 128;
+volatile float vel_x = 0.0f;
+volatile float vel_y = 0.0f;
+volatile float angular_vel = 0.0f;
 }
 
 //制御間隔(micro sec)

@@ -14,7 +14,7 @@ int wheel_controller(
       float angular_vel)
 {
   const Transform::StaticTransform<float>& wheel_frame = wheel_frames[i];
-  const max_wheel_anuglar_vel = Params::max_wheel_anuglar_vel[i];
+  const float max_wheel_anuglar_vel = Params::max_wheel_anuglar_vel[i];
 
   float angular_vel_error = angular_vel - dest_angular_vel;
 
@@ -24,14 +24,16 @@ int wheel_controller(
 }
 
 std::array<float, 4> VOConv(float vx, float vy, float omega) {
-  Transform::MultidiffTransform<float, 1> robot_dest(
+  Transform::MultidiffTransform<float, 1> motion(
     Transform::StaticTransform<float>(0.0f, 0.0f, 0.0f),
     Transform::DynamicTransform<float>(vx, vy, omega)
   );
   std::array<float, 4> wheel_anuglar_vel;
   for(int i=0; i<4; i++){
-    Transform::MultidiffTransform<float, 1> wheel_dest = robot_dest + wheel_frames[i];
-    wheel_anuglar_vel[i] = wheel_dest.static_frame.pos.x / Params::wheel_R;
+    Transform::MultidiffTransform<float, 1> wheel_motion_from_field = motion + wheel_frames[i];
+    Transform::MultidiffTransform<float, 1> wheel_dest = (-wheel_frames[i]) + wheel_motion_from_field;
+    
+    wheel_anuglar_vel[i] = wheel_dest.dynamic_frame[0].pos.x / Params::wheel_R;
   }
   return wheel_anuglar_vel;
 }
@@ -56,10 +58,10 @@ std::array<float, 4> controller_impl(const std::array<float, 4>& angular_wheels)
     }
   }
   
-  std::array<float, 4> v = VOConv(ratio * vel_x, ratio * vel_y, angular_vel);
+  std::array<float, 4> omega_dest = VOConv(ratio * vel_x, ratio * vel_y, angular_vel);
   std::array<float, 4> pwms;
   for(int i=0; i<4; i++){
-    pwms[i] = wheel_controller(v[i], wheel_frames[i], angular_wheels[i]);
+    pwms[i] = wheel_controller(i, omega_dest[i], angular_wheels[i]);
   }
   return pwms;
 }
@@ -70,12 +72,16 @@ void control() {
   std::array<float, 4> angulars{angular_LF, angular_LB, angular_RB, angular_RF};
   std::array<float, 4> pwms = controller_impl(angulars);
   
+  /*
   static std::array<float, 4> thetas{0.0f, 0.0f, 0.0f, 0.0f};
   for(int i=0; i<4; i++){
     thetas[i] += angulars[i] * Params::control_interval_sec;
     Serial.printf("%f ", thetas[i]);
   }
   Serial.printf("\n");
+  */
+  Serial.printf("%f %f %f %f\n", pwms[0], pwms[1], pwms[2], pwms[3]);
+
 
   CommandValue::LF_pwm = pwms[0];
   CommandValue::LB_pwm = pwms[1];

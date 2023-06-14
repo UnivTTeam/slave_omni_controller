@@ -19,7 +19,14 @@ int wheel_controller(
   float angular_vel_error = angular_vel - dest_angular_vel;
 
   float omega_command = dest_angular_vel + (-Params::WheeFeedbackKp) * angular_vel_error;
-  float pwm = Params::MAX_PWM * (omega_command / max_wheel_anuglar_vel);
+  float pwm = Params::pwm_per_omega[i] * omega_command;
+  if(omega_command > Params::omega_thresh){
+    pwm += Params::pwm0[i];
+  } else if(omega_command < -Params::omega_thresh){
+    pwm -= Params::pwm0[i];
+  } else{
+    pwm = 0.0f;
+  }
   return pwm;
 }
 
@@ -63,6 +70,7 @@ std::array<float, 4> controller_impl(const std::array<float, 4>& angular_wheels)
   for(int i=0; i<4; i++){
     pwms[i] = wheel_controller(i, omega_dest[i], angular_wheels[i]);
   }
+
   return pwms;
 }
 
@@ -73,6 +81,12 @@ void control() {
   std::array<float, 4> pwms = controller_impl(angulars);
   
   /*
+  // デバッグ用
+  float t = micros() / (1000.0f * 1000.0f);
+  Serial.printf("%f ", t);
+  for(int i=0; i<4; i++){
+    pwms[i] = 200.0f;
+  }
   static std::array<float, 4> thetas{0.0f, 0.0f, 0.0f, 0.0f};
   for(int i=0; i<4; i++){
     thetas[i] += angulars[i] * Params::control_interval_sec;
@@ -80,8 +94,9 @@ void control() {
   }
   Serial.printf("\n");
   */
-  Serial.printf("%f %f %f %f\n", pwms[0], pwms[1], pwms[2], pwms[3]);
-
+  Serial.printf("%f %f %f %f %f %f %f\n", 
+    TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
+    pwms[0], pwms[1], pwms[2], pwms[4]);
 
   CommandValue::LF_pwm = pwms[0];
   CommandValue::LB_pwm = pwms[1];

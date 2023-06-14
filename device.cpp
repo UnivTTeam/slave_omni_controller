@@ -145,7 +145,7 @@ void setupDevice() {
 void send_pwm(){
   using namespace CommandValue;
 
-  LF_pwm = clipPwm(LF_pwm, Params::reverse_wheel[0]);
+  LF_pwm = clipPwm(LF_pwm, Params::reverse_wheel_motor[0]);
   if(LF_pwm >=0){
     pwm[0]=LF_pwm;
     pwm[1]=0;
@@ -155,7 +155,7 @@ void send_pwm(){
     pwm[1]=-LF_pwm;
   }
   
-  LB_pwm = clipPwm(LB_pwm, Params::reverse_wheel[1]);
+  LB_pwm = clipPwm(LB_pwm, Params::reverse_wheel_motor[1]);
   if(LB_pwm >=0){
     pwm[2]=LB_pwm;
     pwm[3]=0;
@@ -165,7 +165,7 @@ void send_pwm(){
     pwm[3]=-LB_pwm;
   }
   
-  RB_pwm = clipPwm(RB_pwm, Params::reverse_wheel[2]);
+  RB_pwm = clipPwm(RB_pwm, Params::reverse_wheel_motor[2]);
   if(RB_pwm >=0){
     pwm[4]=RB_pwm;
     pwm[5]=0;
@@ -175,7 +175,7 @@ void send_pwm(){
     pwm[5]=-RB_pwm;
   }
   
-  RF_pwm = clipPwm(RF_pwm, Params::reverse_wheel[3]);
+  RF_pwm = clipPwm(RF_pwm, Params::reverse_wheel_motor[3]);
   if(RF_pwm >=0){
     pwm[6]=RF_pwm;
     pwm[7]=0;
@@ -189,9 +189,6 @@ void send_pwm(){
     ledcWrite(i, pwm[i]);
   }
 }
-
-
-
 
 float dist(float x1,float y1,float x2,float y2){
   return sqrt(pow(x1-x2,2) + pow(y1-y2,2));

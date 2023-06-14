@@ -21,6 +21,11 @@ inline const std::array<float, 4> max_wheel_anuglar_vel{
   6.5f * 2.0f * M_PI,
 };
 
+// drive params
+inline const std::array<float, 4> pwm_per_omega = {4.393683486709225f, 4.3728115096745634f, 4.563073569555043f, 5.355068242836175f};
+inline const std::array<float, 4> pwm0 = {37.37094249490049f, 38.53972376000872f, 34.30724861253726f, 9.37891629552986f};
+inline const float omega_thresh = 30.0f / wheel_R;
+
 // マシン座標上のタイヤ位置(x, y, theta)
 inline const Transform::StaticTransform<float> lf_frame( 299.81f,  289.71f, 0.75 * M_PI);
 inline const Transform::StaticTransform<float> lb_frame(-299.81f,  289.71f,-0.75 * M_PI);
@@ -28,7 +33,8 @@ inline const Transform::StaticTransform<float> rb_frame(-299.81f, -289.71f,-0.25
 inline const Transform::StaticTransform<float> rf_frame( 299.81f, -289.71f, 0.25 * M_PI);
 
 // デバイスパラメタ
-inline const std::array<bool, 4> reverse_wheel{false, false, false, false};
+inline const std::array<bool, 4> reverse_wheel_motor{false, false, false, false};
+inline const std::array<bool, 4> reverse_wheel_enc{true, false, false, false};
 
 // 制御パラメタ
 inline const float WheeFeedbackKp = 4.0f;

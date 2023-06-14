@@ -13,10 +13,8 @@ inline const float control_interval_sec = control_interval_us / 1000000.f;
 inline const float wheel_R = 0.06f;//m,タイヤの半径
 inline const float gear_d = 30.0f;//減速比
 inline const float enc_cycle = 16.0f;//一周あたりの分解能
-inline const float max_angular_vel = 6.0f*M_PI ;//車輪の最大角速度
-inline const float wheel_Reff = wheel_R / gear_d;
-inline const float max_wheel_vel = max_angular_vel * wheel_Reff;
 inline const int MAX_PWM = 250;
+inline const std::array<float, 4> max_wheel_anuglar_vel{0.0f, 0.0f, 0.0f, 0.0f};
 
 // マシン座標上のタイヤ位置(x, y, theta)
 inline const Transform::StaticTransform<float> lf_frame( 250.0f,  250.0f, 0.75 * M_PI);

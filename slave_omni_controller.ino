@@ -5,7 +5,6 @@
 
 void setup() {
   setupDevice();
-  setupController();
 } 
 
 float last_control_time = 0;

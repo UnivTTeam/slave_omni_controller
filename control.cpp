@@ -94,9 +94,12 @@ void control() {
   }
   Serial.printf("\n");
   */
-  // Serial.printf("%f %f %f %f %f %f %f\n", 
-  //   TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
-  //   pwms[0], pwms[1], pwms[2], pwms[4]);
+  Serial.printf("%f %f %f %f %f %f %f\n", 
+    TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
+    pwms[0], pwms[1], pwms[2], pwms[3]);
+
+  // float t = micros() / (1000.0f * 1000.0f);
+  // Serial.printf("%f %f %f %f %f\n", t, angular_LF, angular_LB, angular_RB, angular_RF);
 
   CommandValue::LF_pwm = pwms[0];
   CommandValue::LB_pwm = pwms[1];

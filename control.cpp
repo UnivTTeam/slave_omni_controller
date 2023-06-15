@@ -81,6 +81,7 @@ void control() {
   std::array<float, 4> pwms = controller_impl(angulars);
   
   // wheel params
+  /*
   float t = micros() / (1000.0f * 1000.0f);
   Serial.printf("%f ", t);
   for(int i=0; i<4; i++){
@@ -92,10 +93,13 @@ void control() {
     Serial.printf("%f ", thetas[i]);
   }
   Serial.printf("\n");
+  */
   
-  // Serial.printf("%f %f %f %f %f %f %f\n", 
-  //   TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
-  //   pwms[0], pwms[1], pwms[2], pwms[3]);
+  float t = micros() / (1000.0f * 1000.0f);
+  Serial.printf("t: %f vx: %f vy: %f om: %f pwm: %f %f %f %f wheel_omega: %f %f %f %f\n", 
+     t, TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
+     pwms[0], pwms[1], pwms[2], pwms[3],
+     angular_LF, angular_LB, angular_RB, angular_RF);
 
   // float t = micros() / (1000.0f * 1000.0f);
   // Serial.printf("%f %f %f %f %f\n", t, angular_LF, angular_LB, angular_RB, angular_RF);

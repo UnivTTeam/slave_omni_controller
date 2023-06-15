@@ -5,14 +5,24 @@
 #include "params.h"
 #include "common.h"
 
+float readFloatValue(){
+  uint8_t bytes[4];
+  for(int i=0; i<4; i++){
+      bytes[i] = Wire.read();
+  }
+
+  float value;
+  memcpy(&value, bytes, sizeof(float));
+  return value;
+}
+
 void receiveEvent(int cnt)
 {
   using namespace TargetValue;
   if(Wire.available()>1){
-    vel_x = decode_uint8(Wire.read(), Params::MAX_PARA_VEL);
-    vel_y = decode_uint8(Wire.read(), Params::MAX_PARA_VEL);
-    angular_vel = decode_uint8(Wire.read(), Params::MAX_ROT_VEL);
-    master_status = Wire.read();
+    vel_x = readFloatValue();
+    vel_y = readFloatValue();
+    angular_vel = readFloatValue();
   }
 }
 

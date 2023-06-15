@@ -22,14 +22,14 @@ int clipPwm(int pwm, bool reverse)
 }
 
 //モーター系
-const int LF_A = 15;
-const int LF_B = 2;
-const int LB_A = 4;
-const int LB_B = 16;
-const int RB_A = 17;
-const int RB_B = 5;
-const int RF_A = 18;
-const int RF_B = 19;
+constexpr int LF_A = 15;
+constexpr int LF_B = 2;
+constexpr int LB_A = 4;
+constexpr int LB_B = 16;
+constexpr int RB_A = 17;
+constexpr int RB_B = 5;
+constexpr int RF_A = 18;
+constexpr int RF_B = 19;
 
 namespace CommandValue{
 volatile int LF_pwm = 0;
@@ -92,8 +92,6 @@ volatile float vel_y = 0.0f;
 volatile float angular_vel = 0.0f;
 }
 
-//制御間隔(micro sec)
-float dt = Params::control_interval_us;//20ms
 unsigned long tmp_time = 0;
 float stime = 0;
 float stime_offset = 0;

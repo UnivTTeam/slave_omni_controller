@@ -7,21 +7,23 @@ void setup() {
   setupDevice();
 } 
 
-float last_control_time = 0;
+constexpr float CONTROL_INTERVAL_US = Params::CONTROL_INTERVAL_MS * 1000.0f;
+
 void loop() {
-  // メインループ
-  last_control_time = micros() - Params::control_interval_us;
+  // 現在時刻
+  static float last_control_time_us = micros() - CONTROL_INTERVAL_US;
+  float current_time_us = micros();
+  float interval_us = current_time_us - last_control_time_us;
 
-  // 一定周期ごとに制御を行う
-  if (micros() - last_control_time >= Params::control_interval_us) {
-    // 時刻情報をアップデート
-    last_control_time = micros();
+  if (interval_us >= CONTROL_INTERVAL_US) {
+    // 時刻情報アップデート
+    last_control_time_us = current_time_us;
+    Params::control_interval_sec = interval_us / (1000.0f * 1000.0f);
 
-    // エンコーダーの積算値から各輪の角速度を計算
+    // デバイス情報アップデート
     calc_wheel_ang_vel();
 
-    // 指令xy速度と角速度に応じて各輪を制御
-    // omni_vel_allocator(); -> calc_pwm(); に相当
+    // 制御
     control();
   
     //pwmを各モーターに指令

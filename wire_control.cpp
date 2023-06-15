@@ -3,7 +3,6 @@
 #include "wire_control.h"
 #include "device.h"
 #include "params.h"
-#include "common.h"
 
 float readFloatValue(){
   uint8_t bytes[4];

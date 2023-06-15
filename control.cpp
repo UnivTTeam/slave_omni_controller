@@ -45,7 +45,7 @@ std::array<float, 4> VOConv(float vx, float vy, float omega) {
   return wheel_anuglar_vel;
 }
 
-std::array<float, 4> controller_impl(const std::array<float, 4>& angular_wheels) {
+float limitVelocity() {
   using namespace TargetValue;
   std::array<float, 4> omega_rot = VOConv(0.0f, 0.0f, angular_vel);
   std::array<float, 4> omega_para = VOConv(vel_x, vel_y, 0.0f);
@@ -64,45 +64,38 @@ std::array<float, 4> controller_impl(const std::array<float, 4>& angular_wheels)
       }
     }
   }
-  
-  std::array<float, 4> omega_dest = VOConv(ratio * vel_x, ratio * vel_y, angular_vel);
-  std::array<float, 4> pwms;
-  for(int i=0; i<4; i++){
-    pwms[i] = wheel_controller(i, omega_dest[i], angular_wheels[i]);
-  }
-
-  return pwms;
+  return ratio;
 }
 
 void control() {
   using namespace SensorValue;
+  using namespace TargetValue;
 
-  std::array<float, 4> angulars{angular_LF, angular_LB, angular_RB, angular_RF};
-  std::array<float, 4> pwms = controller_impl(angulars);
-  
-  // wheel params
+  float ratio = limitVelocity();
+  std::array<float, 4> omega_dest = VOConv(ratio * vel_x, ratio * vel_y, angular_vel);
+
+  std::array<float, 4> pwms;
+  for(int i=0; i<4; i++){
+    pwms[i] = wheel_controller(i, omega_dest[i], wheel_omega[i]);
+  }
+
   /*
+  // wheel params
   float t = micros() / (1000.0f * 1000.0f);
-  Serial.printf("%f ", t);
   for(int i=0; i<4; i++){
     pwms[i] = 200.0f;
   }
-  static std::array<float, 4> thetas{0.0f, 0.0f, 0.0f, 0.0f};
-  for(int i=0; i<4; i++){
-    thetas[i] += angulars[i] * Params::control_interval_sec;
-    Serial.printf("%f ", thetas[i]);
-  }
-  Serial.printf("\n");
+  Serial.printf("%f %f %f %f %f\n", t,
+      wheel_theta[0], wheel_theta[1], wheel_theta[2], wheel_theta[3]);
   */
   
+  
+  // map log
   float t = micros() / (1000.0f * 1000.0f);
   Serial.printf("t: %f vx: %f vy: %f om: %f pwm: %f %f %f %f wheel_omega: %f %f %f %f\n", 
      t, TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
      pwms[0], pwms[1], pwms[2], pwms[3],
-     angular_LF, angular_LB, angular_RB, angular_RF);
-
-  // float t = micros() / (1000.0f * 1000.0f);
-  // Serial.printf("%f %f %f %f %f\n", t, angular_LF, angular_LB, angular_RB, angular_RF);
+     wheel_omega[0], wheel_omega[1], wheel_omega[2], wheel_omega[3]);
 
   CommandValue::LF_pwm = pwms[0];
   CommandValue::LB_pwm = pwms[1];

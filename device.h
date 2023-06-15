@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 // センサ系統
 namespace SensorRawValue{
 extern volatile int m_nOldRot_LF;
@@ -12,10 +14,8 @@ extern volatile int m_nOldRot_RF;
 extern volatile int m_nValue_RF;
 }
 namespace SensorValue{
-extern volatile float angular_LF;
-extern volatile float angular_LB;
-extern volatile float angular_RB;
-extern volatile float angular_RF;
+inline std::array<float, 4> wheel_theta{0.0f, 0.0f, 0.0f, 0.0f};
+inline std::array<float, 4> wheel_omega{0.0f, 0.0f, 0.0f, 0.0f};
 }
 
 // 子機のプログラムでは読み取る変数

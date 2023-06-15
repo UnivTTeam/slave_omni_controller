@@ -9,9 +9,56 @@ using Params::enc_cycle, Params::gear_d, Params::control_interval_sec, Params::r
 
 #define enc_lowpass 0.8  //for enc to wheelangularvel lowpass
 
+struct EncoderDevice {
+  explicit EncoderDevice(int aPinID, int bPinID) 
+  : m_nOldRot(0), m_nValue(0), aPinID(aPinID), bPinID(bPinID)
+  {
+  }
+
+  float getDiff()
+  {
+    float ret = m_nValue;
+    m_nValue = 0.0f;
+    return ret;
+  }
+
+  void update()
+  {
+    int aPin = digitalRead(aPinID);
+    int bPin = digitalRead(bPinID);
+    if(!aPin){  // ロータリーエンコーダー回転開始
+      m_nOldRot = bPin?1:-1;
+    } else { 
+      if(bPin){
+        if(m_nOldRot == -1){
+          m_nValue--;
+        }
+      } else {
+        if(m_nOldRot == 1){
+          m_nValue++;
+        }
+      }
+      m_nOldRot = 0;
+    }    
+  }
+
+private:
+  int m_nOldRot;
+  int m_nValue;
+  int aPinID;
+  int bPinID;
+};
+
+std::array<EncoderDevice, 4> wheel_encs = {
+  EncoderDevice(ENC_LF, ENC_LF2),
+  EncoderDevice(ENC_LB, ENC_LB2),
+  EncoderDevice(ENC_RB, ENC_RB2),
+  EncoderDevice(ENC_RF, ENC_RF2),
+};
+
 float rawValueToTheta(int i, float diff)
 {
-  float theta = diff / enc_cycle / gear_d * 2 * M_PI / control_interval_sec;
+  float theta = diff / enc_cycle / gear_d * 2 * M_PI;
   if(reverse_wheel_enc[i]){
     return -theta;
   }else{
@@ -20,122 +67,31 @@ float rawValueToTheta(int i, float diff)
 }
 
 void calc_wheel_ang_vel(){
-  float LF_enc_diff = m_nValue_LF;
-  m_nValue_LF = 0;
-  float LF_a = rawValueToTheta(0, LF_enc_diff);
-  angular_LF = enc_lowpass * angular_LF + (1-enc_lowpass) * LF_a;
-  
-  float LB_enc_diff = m_nValue_LB;
-  m_nValue_LB = 0;
-  float LB_a = rawValueToTheta(1, LB_enc_diff);
-  angular_LB = enc_lowpass * angular_LB + (1-enc_lowpass) * LB_a;
- 
-  float RB_enc_diff = m_nValue_RB;
-  m_nValue_RB = 0;
-  float RB_a = rawValueToTheta(2, RB_enc_diff);
-  angular_RB = enc_lowpass * angular_RB + (1-enc_lowpass) * RB_a;
+  for(int i=0; i<4; i++){
+    float enc_diff = wheel_encs[i].getDiff();
+    float dTheta = rawValueToTheta(0, enc_diff);
+    wheel_theta[i] += dTheta;
 
-  float RF_enc_diff = m_nValue_RF;
-  m_nValue_RF = 0;
-  float RF_a = rawValueToTheta(3, RF_enc_diff);
-  angular_RF = enc_lowpass * angular_RF + (1-enc_lowpass) * RF_a;
-  
-//  Serial.print("angular_LF");
-//  Serial.println(angular_LF);
-//  Serial.print("angular_LB");
-//  Serial.println(angular_LB);
-//  Serial.print("angular_RB");
-//  Serial.println(angular_RB);
-//  Serial.print("angular_RF");
-//  Serial.println(angular_RF);
-  //エンコーダのインクリメントから車輪の角速度を求める
+    float omega = dTheta / control_interval_sec;
+    wheel_omega[i] = enc_lowpass * wheel_omega[0] + (1-enc_lowpass) * omega;
+  }
 }
-
-
-
-
-
-
-
 
 void rotRotEnc_LF(void)//エンコーダの計測関数
 {
-  int aPin,bPin;
-  aPin=digitalRead(ENC_LF);
-  bPin=digitalRead(ENC_LF2);
-  if(!aPin){  // ロータリーエンコーダー回転開始
-    m_nOldRot_LF = bPin?1:-1;
-  } else { 
-    if(bPin){
-      if(m_nOldRot_LF == -1){
-        m_nValue_LF--;
-      }
-    } else {
-      if(m_nOldRot_LF == 1){
-        m_nValue_LF++;
-      }
-    }
-    m_nOldRot_LF = 0;
-  }
+  wheel_encs[0].update();
 }
 
 void rotRotEnc_LB(void)//エンコーダの計測関数
 {
-  int aPin,bPin;
-  aPin=digitalRead(ENC_LB);
-  bPin=digitalRead(ENC_LB2);
-  if(!aPin){  // ロータリーエンコーダー回転開始
-    m_nOldRot_LB = bPin?1:-1;
-  } else { 
-    if(bPin){
-      if(m_nOldRot_LB == -1){
-        m_nValue_LB--;
-      }
-    } else {
-      if(m_nOldRot_LB == 1){
-        m_nValue_LB++;
-      }
-    }
-    m_nOldRot_LB = 0;
-  }
+  wheel_encs[1].update();
 }
+
 void rotRotEnc_RB(void)//エンコーダの計測関数
 {
-  int aPin,bPin;
-  aPin=digitalRead(ENC_RB);
-  bPin=digitalRead(ENC_RB2);
-  if(!aPin){  // ロータリーエンコーダー回転開始
-    m_nOldRot_RB = bPin?1:-1;
-  } else { 
-    if(bPin){
-      if(m_nOldRot_RB == -1){
-        m_nValue_RB--;
-      }
-    } else {
-      if(m_nOldRot_RB == 1){
-        m_nValue_RB++;
-      }
-    }
-    m_nOldRot_RB = 0;
-  }
+  wheel_encs[2].update();
 }
 void rotRotEnc_RF(void)//エンコーダの計測関数
 {
-  int aPin,bPin;
-  aPin=digitalRead(ENC_RF);
-  bPin=digitalRead(ENC_RF2);
-  if(!aPin){  // ロータリーエンコーダー回転開始
-    m_nOldRot_RF = bPin?1:-1;
-  } else { 
-    if(bPin){
-      if(m_nOldRot_RF == -1){
-        m_nValue_RF--;
-      }
-    } else {
-      if(m_nOldRot_RF == 1){
-        m_nValue_RF++;
-      }
-    }
-    m_nOldRot_RF = 0;
-  }
+  wheel_encs[3].update();
 }

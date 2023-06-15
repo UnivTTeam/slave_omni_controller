@@ -51,27 +51,6 @@ volatile int m_nValue_RB  = 0;
 volatile int m_nOldRot_RF = 0;
 volatile int m_nValue_RF  = 0;
 }
-namespace SensorValue{
-volatile float angular_LF = 0.0f;
-volatile float angular_LB = 0.0f;
-volatile float angular_RB = 0.0f;
-volatile float angular_RF = 0.0f;
-}
-
-//回転数制御用
-float errLF = 0;
-float errLF_past = 0;
-float errLB = 0;
-float errLB_past = 0;
-float errRB = 0;
-float errRB_past = 0;
-float errRF = 0;
-float errRF_past = 0;
-
-float wheel_kp = 1.0;
-float wheel_ki = 0.0;
-float wheel_kd = 0.0;
-float wheel_p_max = 5;
 
 //状態
 namespace TargetValue{
@@ -80,11 +59,6 @@ volatile int master_status = 0;//親機の状態
 namespace CommandValue{
 volatile int slave_status = 0;//本機の状態
 }
-
-//オドメトリ系
-float pos_x = 0;//m
-float pos_y = 0;//m
-float yaw = 0;//rad
 
 namespace TargetValue{
 volatile float vel_x = 0.0f;
@@ -188,6 +162,3 @@ void send_pwm(){
   }
 }
 
-float dist(float x1,float y1,float x2,float y2){
-  return sqrt(pow(x1-x2,2) + pow(y1-y2,2));
-}

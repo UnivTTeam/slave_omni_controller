@@ -22,9 +22,9 @@ inline constexpr std::array<float, 4> max_wheel_anuglar_vel{
 };
 
 // drive params
-inline const std::array<float, 4> pwm_per_omega = {4.462628750019754f, 4.391453732072704f, 4.375181362461421f, 4.4f};
-inline const std::array<float, 4> pwm0 = {32.683707696521445f, 31.512686486845706f, 36.19723909613685f, 32.0f};
-inline constexpr float omega_thresh = 30.0f / wheel_R;
+inline const std::array<float, 4> pwm_per_omega = {4.325304242876692f, 4.30423987922306f, 4.505589196029983f, 5.290614211595727f};
+inline const std::array<float, 4> pwm0 = {37.46735839899752f, 38.63951379025713f, 34.25211616656666f, 9.516890077136148f};
+inline constexpr float omega_thresh = 50.0f / wheel_R;
 
 // マシン座標上のタイヤ位置(x, y, theta)
 inline const Transform::StaticTransform<float> lf_frame( 299.81f,  289.71f, 0.75 * M_PI);

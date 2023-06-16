@@ -5,7 +5,7 @@
 
 using Params::enc_cycle, Params::gear_d, Params::control_interval_sec, Params::reverse_wheel_enc;
 
-#define enc_lowpass 0.8  //for enc to wheelangularvel lowpass
+#define enc_lowpass 0.9  //for enc to wheelangularvel lowpass
 
 struct EncoderDevice {
   explicit EncoderDevice(bool reverse, int aPinID, int bPinID) 

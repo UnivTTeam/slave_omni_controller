@@ -13,9 +13,10 @@ enum class Mode {
   DriveCheck = 4,
 };
 
-Mode mode = Mode::SensorCheck;
+Mode mode = Mode::Normal;
 constexpr float device_check_pwm = 100.0f;
-constexpr float wheel_params_pwm = 100.0f;
+constexpr int wheel_param_target_id = 3;
+constexpr float wheel_params_pwm = 200.0f;
 constexpr float drive_check_vel = 100.0f;
 constexpr float drive_check_omega = 0.5f;
 
@@ -142,7 +143,9 @@ void control() {
     // wheel params
     float t = micros() / (1000.0f * 1000.0f);
     for(int i=0; i<4; i++){
-      wheel_pwm[i] = 200.0f;
+      if(wheel_param_target_id == -1 || wheel_param_target_id == i){
+        wheel_pwm[i] = wheel_params_pwm;
+      }
     }
     Serial.printf("%f %f %f %f %f\n", t,
         wheel_theta[0], wheel_theta[1], wheel_theta[2], wheel_theta[3]);

@@ -29,5 +29,5 @@ void requestEvent(){
   using namespace CommandValue;
   //ログを送りつけたい
   //じつは直でwifiに流した方がいい？
-  Wire.write(uint8_t(slave_status));
+  //Wire.write(uint8_t(slave_status));
 }

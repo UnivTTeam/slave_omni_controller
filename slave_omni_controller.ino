@@ -1,5 +1,5 @@
 #include "device.h"
-#include "odometry.h"
+#include "encoder.h"
 #include "params.h"
 #include "control.h"
 

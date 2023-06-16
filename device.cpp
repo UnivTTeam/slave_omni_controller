@@ -4,7 +4,7 @@
 #include "wire_control.h"
 #include "device.h"
 #include "params.h"
-#include "odometry.h"
+#include "encoder.h"
 
 #define IDC 23
 #define OMNI_ID 0x34
@@ -31,27 +31,6 @@ constexpr int RB_B = 5;
 constexpr int RF_A = 18;
 constexpr int RF_B = 19;
 
-namespace CommandValue{
-volatile int LF_pwm = 0;
-volatile int LB_pwm = 0;
-volatile int RB_pwm = 0;
-volatile int RF_pwm = 0;
-}
-
-int pwm[8]={0,0,0,0,0,0,0,0};
-
-namespace SensorRawValue{
-//エンコーダ系
-volatile int m_nOldRot_LF = 0;
-volatile int m_nValue_LF  = 0;
-volatile int m_nOldRot_LB = 0;
-volatile int m_nValue_LB = 0;
-volatile int m_nOldRot_RB = 0;
-volatile int m_nValue_RB  = 0;
-volatile int m_nOldRot_RF = 0;
-volatile int m_nValue_RF  = 0;
-}
-
 //状態
 namespace TargetValue{
 volatile int master_status = 0;//親機の状態
@@ -65,10 +44,6 @@ volatile float vel_x = 0.0f;
 volatile float vel_y = 0.0f;
 volatile float angular_vel = 0.0f;
 }
-
-unsigned long tmp_time = 0;
-float stime = 0;
-float stime_offset = 0;
 
 void setupDevice() {
   Wire.begin(uint8_t(OMNI_ID));
@@ -115,50 +90,18 @@ void setupDevice() {
 } 
 
 void send_pwm(){
-  using namespace CommandValue;
+  int j = 0;
 
-  LF_pwm = clipPwm(LF_pwm, Params::reverse_wheel_motor[0]);
-  if(LF_pwm >=0){
-    pwm[0]=LF_pwm;
-    pwm[1]=0;
-  }
-  else if(LF_pwm <0){
-    pwm[0]=0;
-    pwm[1]=-LF_pwm;
-  }
-  
-  LB_pwm = clipPwm(LB_pwm, Params::reverse_wheel_motor[1]);
-  if(LB_pwm >=0){
-    pwm[2]=LB_pwm;
-    pwm[3]=0;
-  }
-  else if(LB_pwm <0){
-    pwm[2]=0;
-    pwm[3]=-LB_pwm;
-  }
-  
-  RB_pwm = clipPwm(RB_pwm, Params::reverse_wheel_motor[2]);
-  if(RB_pwm >=0){
-    pwm[4]=RB_pwm;
-    pwm[5]=0;
-  }
-  else if(RB_pwm <0){
-    pwm[4]=0;
-    pwm[5]=-RB_pwm;
-  }
-  
-  RF_pwm = clipPwm(RF_pwm, Params::reverse_wheel_motor[3]);
-  if(RF_pwm >=0){
-    pwm[6]=RF_pwm;
-    pwm[7]=0;
-  }
-  else if(RF_pwm <0){
-    pwm[6]=0;
-    pwm[7]=-RF_pwm;
-  }
+  for(int i=0; i<4; i++){
+    int pwm = clipPwm(CommandValue::wheel_pwm[i], Params::reverse_wheel_motor[0]);
 
-  for(int i = 0; i < 8; i++){
-    ledcWrite(i, pwm[i]);
+    if(pwm >= 0){
+      ledcWrite(2*i, pwm);
+      ledcWrite(2*i+1, 0);
+    }else{
+      ledcWrite(2*i, 0);
+      pwm = -pwm;
+      ledcWrite(2*i+1, pwm);
+    }
   }
 }
-

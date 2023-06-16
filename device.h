@@ -3,16 +3,6 @@
 #include <array>
 
 // センサ系統
-namespace SensorRawValue{
-extern volatile int m_nOldRot_LF;
-extern volatile int m_nValue_LF;
-extern volatile int m_nOldRot_LB;
-extern volatile int m_nValue_LB;
-extern volatile int m_nOldRot_RB;
-extern volatile int m_nValue_RB;
-extern volatile int m_nOldRot_RF;
-extern volatile int m_nValue_RF;
-}
 namespace SensorValue{
 inline std::array<float, 4> wheel_theta{0.0f, 0.0f, 0.0f, 0.0f};
 inline std::array<float, 4> wheel_omega{0.0f, 0.0f, 0.0f, 0.0f};
@@ -28,11 +18,7 @@ extern volatile int master_status;
 
 // 子機のプログラムでは書き込む変数
 namespace CommandValue{
-extern volatile int LF_pwm;
-extern volatile int LB_pwm;
-extern volatile int RB_pwm;
-extern volatile int RF_pwm;
-extern volatile int slave_status;
+inline std::array<float, 4> wheel_pwm{0.0f, 0.0f, 0.0f, 0.0f};
 }
 
 void setupDevice();

@@ -67,38 +67,66 @@ float limitVelocity() {
   return ratio;
 }
 
+enum class Mode {
+  Normal = 0,
+  DeviceCheck = 1,
+  WheelParams = 2,
+};
+
+Mode mode = Mode::Normal;
+constexpr float device_check_pwm = 100.0f;
+constexpr float wheel_params_pwm = 100.0f;
+
 void control() {
   using namespace SensorValue;
-  using namespace TargetValue;
+  using CommandValue::wheel_pwm;
 
-  float ratio = limitVelocity();
-  std::array<float, 4> omega_dest = VOConv(ratio * vel_x, ratio * vel_y, angular_vel);
+  wheel_pwm = std::array<float, 4>{{0.0f, 0.0f, 0.0f, 0.0f}};
 
-  std::array<float, 4> pwms;
-  for(int i=0; i<4; i++){
-    pwms[i] = wheel_controller(i, omega_dest[i], wheel_omega[i]);
+  if(mode == Mode::Normal){
+    using namespace TargetValue;
+    float ratio = limitVelocity();
+    std::array<float, 4> omega_dest = VOConv(ratio * vel_x, ratio * vel_y, angular_vel);
+
+    for(int i=0; i<4; i++){
+      wheel_pwm[i] = wheel_controller(i, omega_dest[i], wheel_omega[i]);
+    }
+
+    // map log
+    float t = micros() / (1000.0f * 1000.0f);
+    Serial.printf("t: %f vx: %f vy: %f om: %f pwm: %f %f %f %f wheel_omega: %f %f %f %f\n", 
+      t, TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
+      wheel_pwm[0], wheel_pwm[1], wheel_pwm[2], wheel_pwm[3],
+      wheel_omega[0], wheel_omega[1], wheel_omega[2], wheel_omega[3]);
+  }else if(mode == Mode::DeviceCheck){
+    int t = millis() / 1000;
+    t %= 24;
+    if(t%2 == 0){
+      if(t<8){
+        int i = t/2;
+        wheel_pwm[i] = device_check_pwm;
+      } else if(t<10){
+        for(int i=0; i<4; i++){
+          wheel_pwm[i] = device_check_pwm;
+        }
+      } else if(t<18){
+        int i = t/2 - 5;
+        wheel_pwm[i] = device_check_pwm;
+      } else if(t<20){
+        for(int i=0; i<4; i++){
+          wheel_pwm[i] = -device_check_pwm;
+        }
+      }
+    }
+    Serial.printf("%f %f %f %f\n",
+      wheel_omega[0], wheel_omega[1], wheel_omega[2], wheel_omega[3]);    
+  }else if(mode == Mode::WheelParams){
+    // wheel params
+    float t = micros() / (1000.0f * 1000.0f);
+    for(int i=0; i<4; i++){
+      wheel_pwm[i] = 200.0f;
+    }
+    Serial.printf("%f %f %f %f %f\n", t,
+        wheel_theta[0], wheel_theta[1], wheel_theta[2], wheel_theta[3]);
   }
-
-  /*
-  // wheel params
-  float t = micros() / (1000.0f * 1000.0f);
-  for(int i=0; i<4; i++){
-    pwms[i] = 200.0f;
-  }
-  Serial.printf("%f %f %f %f %f\n", t,
-      wheel_theta[0], wheel_theta[1], wheel_theta[2], wheel_theta[3]);
-  */
-  
-  
-  // map log
-  float t = micros() / (1000.0f * 1000.0f);
-  Serial.printf("t: %f vx: %f vy: %f om: %f pwm: %f %f %f %f wheel_omega: %f %f %f %f\n", 
-     t, TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
-     pwms[0], pwms[1], pwms[2], pwms[3],
-     wheel_omega[0], wheel_omega[1], wheel_omega[2], wheel_omega[3]);
-
-  CommandValue::LF_pwm = pwms[0];
-  CommandValue::LB_pwm = pwms[1];
-  CommandValue::RB_pwm = pwms[2];
-  CommandValue::RF_pwm = pwms[3];
 }

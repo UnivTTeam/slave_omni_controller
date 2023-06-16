@@ -3,8 +3,6 @@
 #include "device.h"
 #include "params.h"
 
-using namespace SensorRawValue;
-using namespace SensorValue;
 using Params::enc_cycle, Params::gear_d, Params::control_interval_sec, Params::reverse_wheel_enc;
 
 #define enc_lowpass 0.8  //for enc to wheelangularvel lowpass
@@ -69,11 +67,11 @@ float rawValueToTheta(int i, float diff)
 void calc_wheel_ang_vel(){
   for(int i=0; i<4; i++){
     float enc_diff = wheel_encs[i].getDiff();
-    float dTheta = rawValueToTheta(0, enc_diff);
-    wheel_theta[i] += dTheta;
+    float dTheta = rawValueToTheta(i, enc_diff);
+    SensorValue::wheel_theta[i] += dTheta;
 
     float omega = dTheta / control_interval_sec;
-    wheel_omega[i] = enc_lowpass * wheel_omega[0] + (1-enc_lowpass) * omega;
+    SensorValue::wheel_omega[i] = enc_lowpass * SensorValue::wheel_omega[i] + (1-enc_lowpass) * omega;
   }
 }
 

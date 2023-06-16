@@ -9,61 +9,64 @@ using Params::enc_cycle, Params::gear_d, Params::control_interval_sec, Params::r
 
 struct EncoderDevice {
   explicit EncoderDevice(bool reverse, int aPinID, int bPinID) 
-  : m_nOldRot(0), m_nValue(0), aPinID(aPinID), bPinID(bPinID), theta(0.0f), omega(0.0f)
+  : rawDiff(0), aPinID(aPinID), bPinID(bPinID), theta(0.0f), omega(0.0f)
   {
-    scale = diff / enc_cycle / gear_d * 2 * M_PI;
+    state = getState();
+
+    scale = diff / enc_cycle / gear_d * 2 * M_PI / 4;
     if(reverse){
         scale = -scale;
     }
+
     last_interrupt_time = micros() - 1;
     last_interrupt_direction = 0.0f;
   }
 
+  int getState(){
+    int aPin = digitalRead(aPinID);
+    int bPin = digitalRead(bPinID);
+    int ret = 2*aPin + (aPin^bPin);
+    return ret;
+  }
+
   void update()
   {
-    float dTheta = scale * m_nValue;
-    m_nValue = 0.0f;
+    float dTheta = scale * rawDiff;
+    rawDiff = 0;
 
     theta += dTheta;
     
     float omega0 = dTheta / control_interval_sec;
-    // omega = omega0;
-    // omega = enc_lowpass * omega + (1-enc_lowpass) * omega0;
-    omega = last_interrupt_direction / last_interrupt_time;
+    float omega_lp = enc_lowpass * omega + (1-enc_lowpass) * omega0;
+    float omega_t = last_interrupt_direction / last_interrupt_time;
+
+    omega = 0.5f * omega0 + 0.5f * omega_t;
   }
 
   void pinInterrupt()
   {
-    int aPin = digitalRead(aPinID);
-    int bPin = digitalRead(bPinID);
+    int new_state = getState();
     int t = micros();
-    if(!aPin){  // ロータリーエンコーダー回転開始
-      m_nOldRot = bPin?1:-1;
-    } else { 
-      if(bPin){
-        if(m_nOldRot == -1){
-          m_nValue--;
-          last_interrupt_time = t;
-          last_interrupt_direction = -1.0f;
-        }
-      } else {
-        if(m_nOldRot == 1){
-          m_nValue++;
-          last_interrupt_time = t;
-          last_interrupt_direction = 1.0f;
-        }
-      }
-      m_nOldRot = 0;
-    }    
+
+    int diff = new_state - state;
+    if(diff == 3){
+        diff = -1;
+    }else if(diff == -3){
+        diff = 1;
+    }
+    rawDiff += diff;
+
+    last_interrupt_time = t;
+    last_interrupt_direction = static_cast<float>(diff);
   }
 
   float getTheta(){ return theta; };
   float getOmega(){ return omega; };
 private:
-  int m_nOldRot;
-  int m_nValue;
+  int rawDiff;
   int aPinID;
   int bPinID;
+  int state;
 
   int last_interrupt_time;
   float last_interrupt_direction;

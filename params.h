@@ -36,6 +36,8 @@ inline const Transform::StaticTransform<float> rf_frame( 299.81f, -289.71f, 0.25
 inline constexpr std::array<bool, 4> reverse_wheel_motor{true, false, false, false};
 inline constexpr std::array<bool, 4> reverse_wheel_enc{false, false, false, true};
 
+#define USE_ENCODER_FULL_RESOLUTION
+
 // 制御パラメタ
 inline float WheeFeedbackKp = 4.0f;
 }

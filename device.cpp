@@ -83,10 +83,22 @@ void setupDevice() {
   pinMode(ENC_RF, INPUT_PULLUP);
   pinMode(ENC_RF2, INPUT_PULLUP);
   
+#ifdef USE_ENCODER_FULL_RESOLUTION
   attachInterrupt(ENC_LF,rotRotEnc_LF,CHANGE);
   attachInterrupt(ENC_LB,rotRotEnc_LB,CHANGE);
   attachInterrupt(ENC_RB,rotRotEnc_RB,CHANGE);
   attachInterrupt(ENC_RF,rotRotEnc_RF,CHANGE);
+
+  attachInterrupt(ENC_LF2,rotRotEnc_LF,CHANGE);
+  attachInterrupt(ENC_LB2,rotRotEnc_LB,CHANGE);
+  attachInterrupt(ENC_RB2,rotRotEnc_RB,CHANGE);
+  attachInterrupt(ENC_RF2,rotRotEnc_RF,CHANGE);
+#else
+  attachInterrupt(ENC_LF,rotRotEnc_LF,RISING);
+  attachInterrupt(ENC_LB,rotRotEnc_LB,RISING);
+  attachInterrupt(ENC_RB,rotRotEnc_RB,RISING);
+  attachInterrupt(ENC_RF,rotRotEnc_RF,RISING);
+#endif
 } 
 
 void send_pwm(){

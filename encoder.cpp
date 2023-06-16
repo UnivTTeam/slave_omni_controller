@@ -13,7 +13,12 @@ struct EncoderDevice {
   {
     state = getState();
 
-    scale = (2.0f * M_PI) / (enc_cycle * gear_d);
+#ifdef USE_ENCODER_FULL_RESOLUTION
+    scale = (2.0f * M_PI) / (enc_cycle * gear_d * 4);    
+#else
+    scale = (2.0f * M_PI) / (enc_cycle * gear_d );
+#endif
+
     if(reverse){
       scale = -scale;
     }
@@ -41,34 +46,24 @@ struct EncoderDevice {
 
   void pinInterrupt()
   {
+#ifdef USE_ENCODER_FULL_RESOLUTION
     int new_state = getState();
 
-    // int diff = new_state - state;
-    // if(diff == 3){
-    //   diff = -1;
-    // }else if(diff == -3){
-    //   diff = 1;
-    // }
-    // if(diff == 1){
-    //   rawDiff++;    
-    // }
-    // if(diff == -1){
-    //   rawDiff--;    
-    // }
-    // diff = 0;
-  
-    int diff = 0;
-    if(new_state & 2){
-      if(state == 0){
-        diff = 1;
-      }
-      if(state == 1){
-        diff = -1;
-      }
+    int diff = new_state - state;
+    if(diff == 1 || diff == -3){
+      rawDiff++;    
+    }else if(diff == -1 || diff == 3){
+      rawDiff--;
     }
 
-    rawDiff += diff;
     state = new_state;
+#else
+    if(digitalRead(bPinID)){
+      rawDiff++;
+    }else{
+      rawDiff--;
+    }
+#endif
   }
 
   float getTheta(){ return theta; };

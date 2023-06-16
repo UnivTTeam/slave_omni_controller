@@ -5,6 +5,20 @@
 #include "device.h"
 #include "libwheels/transform2d/transform2d.hpp"
 
+enum class Mode {
+  Normal = 0,
+  SensorCheck = 1,
+  DeviceCheck = 2,
+  WheelParams = 3,
+  DriveCheck = 4,
+};
+
+Mode mode = Mode::SensorCheck;
+constexpr float device_check_pwm = 100.0f;
+constexpr float wheel_params_pwm = 100.0f;
+constexpr float drive_check_vel = 100.0f;
+constexpr float drive_check_omega = 0.5f;
+
 const std::array<Transform::StaticTransform<float>, 4> 
     wheel_frames{Params::lf_frame, Params::lb_frame, Params::rb_frame, Params::rf_frame};
 
@@ -75,19 +89,6 @@ void drive(float vel_x, float vel_y, float angular_vel) {
   }
 }
 
-enum class Mode {
-  Normal = 0,
-  DeviceCheck = 1,
-  WheelParams = 2,
-  DriveCheck = 3,
-};
-
-Mode mode = Mode::Normal;
-constexpr float device_check_pwm = 100.0f;
-constexpr float wheel_params_pwm = 100.0f;
-constexpr float drive_check_vel = 100.0f;
-constexpr float drive_check_omega = 0.5f;
-
 void control() {
   using namespace SensorValue;
   using CommandValue::wheel_pwm;
@@ -105,6 +106,13 @@ void control() {
       t, TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
       wheel_pwm[0], wheel_pwm[1], wheel_pwm[2], wheel_pwm[3],
       wheel_omega[0], wheel_omega[1], wheel_omega[2], wheel_omega[3]);
+  }else if(mode == Mode::SensorCheck){
+    float t = micros() / (1000.0f * 1000.0f);
+    Serial.printf("%f ", t);
+    for(int i=0; i<4; i++){
+      Serial.printf(" %f %f ", wheel_theta[i], wheel_omega[i]);
+    }
+    Serial.printf("\n");
   }else if(mode == Mode::DeviceCheck){
     int t = millis() / 1000;
     t %= 24;

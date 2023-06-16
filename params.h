@@ -33,20 +33,18 @@ inline const Transform::StaticTransform<float> rb_frame(-299.81f, -289.71f,-0.25
 inline const Transform::StaticTransform<float> rf_frame( 299.81f, -289.71f, 0.25 * M_PI);
 
 // デバイスパラメタ
-inline constexpr std::array<bool, 4> reverse_wheel_motor{false, false, false, false};
-inline constexpr std::array<bool, 4> reverse_wheel_enc{true, false, false, false};
+inline constexpr std::array<bool, 4> reverse_wheel_motor{true, false, false, false};
+inline constexpr std::array<bool, 4> reverse_wheel_enc{false, false, false, true};
 
 // 制御パラメタ
-inline constexpr float WheeFeedbackKp = 4.0f;
-
+inline float WheeFeedbackKp = 4.0f;
 }
 
-#define ENC_LF 13
-#define ENC_LF2 12
-#define ENC_LB 14
-#define ENC_LB2 27
-#define ENC_RB 26
-#define ENC_RB2 25
-#define ENC_RF 33
-#define ENC_RF2 32
-
+#define ENC_LF 32
+#define ENC_LF2 33
+#define ENC_LB 25
+#define ENC_LB2 26
+#define ENC_RB 27
+#define ENC_RB2 14
+#define ENC_RF 12
+#define ENC_RF2 13

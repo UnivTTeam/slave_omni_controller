@@ -13,13 +13,10 @@ struct EncoderDevice {
   {
     state = getState();
 
-    scale = diff / enc_cycle / gear_d * 2 * M_PI / 4;
+    scale = (2.0f * M_PI) / (enc_cycle * gear_d);
     if(reverse){
-        scale = -scale;
+      scale = -scale;
     }
-
-    last_interrupt_time = micros() - 1;
-    last_interrupt_direction = 0.0f;
   }
 
   int getState(){
@@ -31,33 +28,47 @@ struct EncoderDevice {
 
   void update()
   {
-    float dTheta = scale * rawDiff;
+    float dTheta = scale * static_cast<float>(rawDiff);
     rawDiff = 0;
 
     theta += dTheta;
     
     float omega0 = dTheta / control_interval_sec;
     float omega_lp = enc_lowpass * omega + (1-enc_lowpass) * omega0;
-    float omega_t = last_interrupt_direction / last_interrupt_time;
-
-    omega = 0.5f * omega0 + 0.5f * omega_t;
+  
+    omega = omega_lp;
   }
 
   void pinInterrupt()
   {
     int new_state = getState();
-    int t = micros();
 
-    int diff = new_state - state;
-    if(diff == 3){
-        diff = -1;
-    }else if(diff == -3){
+    // int diff = new_state - state;
+    // if(diff == 3){
+    //   diff = -1;
+    // }else if(diff == -3){
+    //   diff = 1;
+    // }
+    // if(diff == 1){
+    //   rawDiff++;    
+    // }
+    // if(diff == -1){
+    //   rawDiff--;    
+    // }
+    // diff = 0;
+  
+    int diff = 0;
+    if(new_state & 2){
+      if(state == 0){
         diff = 1;
+      }
+      if(state == 1){
+        diff = -1;
+      }
     }
-    rawDiff += diff;
 
-    last_interrupt_time = t;
-    last_interrupt_direction = static_cast<float>(diff);
+    rawDiff += diff;
+    state = new_state;
   }
 
   float getTheta(){ return theta; };
@@ -67,9 +78,6 @@ private:
   int aPinID;
   int bPinID;
   int state;
-
-  int last_interrupt_time;
-  float last_interrupt_direction;
 
   float theta;
   float omega;

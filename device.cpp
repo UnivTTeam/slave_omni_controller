@@ -22,14 +22,14 @@ int clipPwm(int pwm, bool reverse)
 }
 
 //モーター系
-constexpr int LF_A = 15;
-constexpr int LF_B = 2;
-constexpr int LB_A = 4;
-constexpr int LB_B = 16;
-constexpr int RB_A = 17;
-constexpr int RB_B = 5;
-constexpr int RF_A = 18;
-constexpr int RF_B = 19;
+constexpr int LF_A = 17;
+constexpr int LF_B = 5;
+constexpr int LB_A = 18;
+constexpr int LB_B = 19;
+constexpr int RB_A = 4;
+constexpr int RB_B = 16;
+constexpr int RF_A = 15;
+constexpr int RF_B = 2;
 
 //状態
 namespace TargetValue{
@@ -93,7 +93,7 @@ void send_pwm(){
   int j = 0;
 
   for(int i=0; i<4; i++){
-    int pwm = clipPwm(CommandValue::wheel_pwm[i], Params::reverse_wheel_motor[0]);
+    int pwm = clipPwm(CommandValue::wheel_pwm[i], Params::reverse_wheel_motor[i]);
 
     if(pwm >= 0){
       ledcWrite(2*i, pwm);

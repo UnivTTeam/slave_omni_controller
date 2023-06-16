@@ -67,15 +67,26 @@ float limitVelocity() {
   return ratio;
 }
 
+void drive(float vel_x, float vel_y, float angular_vel) {
+  std::array<float, 4> omega_dest = VOConv(vel_x, vel_y, angular_vel);
+
+  for(int i=0; i<4; i++){
+    CommandValue::wheel_pwm[i] = wheel_controller(i, omega_dest[i], SensorValue::wheel_omega[i]);
+  }
+}
+
 enum class Mode {
   Normal = 0,
   DeviceCheck = 1,
   WheelParams = 2,
+  DriveCheck = 3,
 };
 
 Mode mode = Mode::Normal;
 constexpr float device_check_pwm = 100.0f;
 constexpr float wheel_params_pwm = 100.0f;
+constexpr float drive_check_vel = 100.0f;
+constexpr float drive_check_omega = 0.5f;
 
 void control() {
   using namespace SensorValue;
@@ -86,11 +97,7 @@ void control() {
   if(mode == Mode::Normal){
     using namespace TargetValue;
     float ratio = limitVelocity();
-    std::array<float, 4> omega_dest = VOConv(ratio * vel_x, ratio * vel_y, angular_vel);
-
-    for(int i=0; i<4; i++){
-      wheel_pwm[i] = wheel_controller(i, omega_dest[i], wheel_omega[i]);
-    }
+    drive(ratio * vel_x, ratio * vel_y, angular_vel);
 
     // map log
     float t = micros() / (1000.0f * 1000.0f);
@@ -111,15 +118,18 @@ void control() {
         }
       } else if(t<18){
         int i = t/2 - 5;
-        wheel_pwm[i] = device_check_pwm;
+        wheel_pwm[i] = -device_check_pwm;
       } else if(t<20){
         for(int i=0; i<4; i++){
           wheel_pwm[i] = -device_check_pwm;
         }
       }
     }
-    Serial.printf("%f %f %f %f\n",
-      wheel_omega[0], wheel_omega[1], wheel_omega[2], wheel_omega[3]);    
+    Serial.printf("%d ", t);
+    for(int i=0; i<4; i++){
+      Serial.printf(" %f %f ", wheel_theta[i], wheel_omega[i]);
+    }
+    Serial.printf("\n");
   }else if(mode == Mode::WheelParams){
     // wheel params
     float t = micros() / (1000.0f * 1000.0f);
@@ -128,5 +138,34 @@ void control() {
     }
     Serial.printf("%f %f %f %f %f\n", t,
         wheel_theta[0], wheel_theta[1], wheel_theta[2], wheel_theta[3]);
+  }else if(mode == Mode::DriveCheck){
+    Params::WheeFeedbackKp = -4.0f;
+    int t = millis() / 1000;
+    
+    if(t%4 == 2){
+      t--;
+    }
+    t /= 2;
+
+    t %= 14;
+    if(t%2 == 0){
+      if(t==0){
+        drive(drive_check_vel, 0.0f, 0.0f);
+      } else if(t==2){
+        drive(0.0f, drive_check_vel, 0.0f);
+      } else if(t==4){
+        drive(-drive_check_vel, 0.0f, 0.0f);
+      } else if(t==6){
+        drive(0.0f, -drive_check_vel, 0.0f);
+      } else if(t==8){
+        drive(0.0f, 0.0f, drive_check_omega);
+      } else if(t==10){
+        drive(0.0f, 0.0f, -drive_check_omega);
+      } 
+    }
+    Serial.printf("t: %d vx: %f vy: %f om: %f pwm: %f %f %f %f wheel_omega: %f %f %f %f\n", 
+      t, TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
+      wheel_pwm[0], wheel_pwm[1], wheel_pwm[2], wheel_pwm[3],
+      wheel_omega[0], wheel_omega[1], wheel_omega[2], wheel_omega[3]);
   }
 }

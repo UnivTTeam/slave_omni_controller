@@ -8,19 +8,25 @@ using Params::enc_cycle, Params::gear_d, Params::control_interval_sec, Params::r
 #define enc_lowpass 0.8  //for enc to wheelangularvel lowpass
 
 struct EncoderDevice {
-  explicit EncoderDevice(int aPinID, int bPinID) 
-  : m_nOldRot(0), m_nValue(0), aPinID(aPinID), bPinID(bPinID)
+  explicit EncoderDevice(bool reverse, int aPinID, int bPinID) 
+  : m_nOldRot(0), m_nValue(0), aPinID(aPinID), bPinID(bPinID), theta(0.0f), omega(0.0f)
   {
-  }
-
-  float getDiff()
-  {
-    float ret = m_nValue;
-    m_nValue = 0.0f;
-    return ret;
+    scale = diff / enc_cycle / gear_d * 2 * M_PI;
+    if(reverse){
+        scale = -scale;
+    }
   }
 
   void update()
+  {
+    float dTheta = scale * m_nValue;
+    m_nValue = 0.0f;
+
+    theta += dTheta;
+    omega = dTheta / control_interval_sec;
+  }
+
+  void pinInterrupt()
   {
     int aPin = digitalRead(aPinID);
     int bPin = digitalRead(bPinID);
@@ -40,56 +46,49 @@ struct EncoderDevice {
     }    
   }
 
+  float getTheta(){ return theta; };
+  float getOmega(){ return omega; };
 private:
   int m_nOldRot;
   int m_nValue;
   int aPinID;
   int bPinID;
+
+  float theta;
+  float omega;
+  float scale;
 };
 
 std::array<EncoderDevice, 4> wheel_encs = {
-  EncoderDevice(ENC_LF, ENC_LF2),
-  EncoderDevice(ENC_LB, ENC_LB2),
-  EncoderDevice(ENC_RB, ENC_RB2),
-  EncoderDevice(ENC_RF, ENC_RF2),
+  EncoderDevice(reverse_wheel_enc[0], ENC_LF, ENC_LF2),
+  EncoderDevice(reverse_wheel_enc[1],ENC_LB, ENC_LB2),
+  EncoderDevice(reverse_wheel_enc[2],ENC_RB, ENC_RB2),
+  EncoderDevice(reverse_wheel_enc[3],ENC_RF, ENC_RF2),
 };
 
-float rawValueToTheta(int i, float diff)
-{
-  float theta = diff / enc_cycle / gear_d * 2 * M_PI;
-  if(reverse_wheel_enc[i]){
-    return -theta;
-  }else{
-    return theta;
-  }
-}
-
 void calc_wheel_ang_vel(){
-  for(int i=0; i<4; i++){
-    float enc_diff = wheel_encs[i].getDiff();
-    float dTheta = rawValueToTheta(i, enc_diff);
-    SensorValue::wheel_theta[i] += dTheta;
-
-    float omega = dTheta / control_interval_sec;
-    SensorValue::wheel_omega[i] = enc_lowpass * SensorValue::wheel_omega[i] + (1-enc_lowpass) * omega;
+  for(int i=0; i<4; i++){ 
+    wheel_encs[i].update();
+    SensorValue::wheel_theta[i] = wheel_encs[i].getTheta();
+    SensorValue::wheel_omega[i] = wheel_encs[i].getOmega();
   }
 }
 
 void rotRotEnc_LF(void)//エンコーダの計測関数
 {
-  wheel_encs[0].update();
+  wheel_encs[0].pinInterrupt();
 }
 
 void rotRotEnc_LB(void)//エンコーダの計測関数
 {
-  wheel_encs[1].update();
+  wheel_encs[1].pinInterrupt();
 }
 
 void rotRotEnc_RB(void)//エンコーダの計測関数
 {
-  wheel_encs[2].update();
+  wheel_encs[2].pinInterrupt();
 }
 void rotRotEnc_RF(void)//エンコーダの計測関数
 {
-  wheel_encs[3].update();
+  wheel_encs[3].pinInterrupt();
 }

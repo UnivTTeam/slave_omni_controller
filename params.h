@@ -10,7 +10,7 @@ inline constexpr float CONTROL_INTERVAL_MS = 20.0f;
 inline float control_interval_sec = CONTROL_INTERVAL_MS / 1000.f;
 
 //機体パラメータ
-inline constexpr float wheel_R = 60.0f; //mm,タイヤの半径
+inline constexpr float wheel_R = 51.0f; //mm,タイヤの半径
 inline constexpr float gear_d = 30.0f; //減速比
 inline constexpr float enc_cycle = 16.0f;//一周あたりの分解能
 inline constexpr int MAX_PWM = 250;

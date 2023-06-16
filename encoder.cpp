@@ -15,6 +15,8 @@ struct EncoderDevice {
     if(reverse){
         scale = -scale;
     }
+    last_interrupt_time = micros() - 1;
+    last_interrupt_direction = 0.0f;
   }
 
   void update()
@@ -23,23 +25,32 @@ struct EncoderDevice {
     m_nValue = 0.0f;
 
     theta += dTheta;
-    omega = dTheta / control_interval_sec;
+    
+    float omega0 = dTheta / control_interval_sec;
+    // omega = omega0;
+    // omega = enc_lowpass * omega + (1-enc_lowpass) * omega0;
+    omega = last_interrupt_direction / last_interrupt_time;
   }
 
   void pinInterrupt()
   {
     int aPin = digitalRead(aPinID);
     int bPin = digitalRead(bPinID);
+    int t = micros();
     if(!aPin){  // ロータリーエンコーダー回転開始
       m_nOldRot = bPin?1:-1;
     } else { 
       if(bPin){
         if(m_nOldRot == -1){
           m_nValue--;
+          last_interrupt_time = t;
+          last_interrupt_direction = -1.0f;
         }
       } else {
         if(m_nOldRot == 1){
           m_nValue++;
+          last_interrupt_time = t;
+          last_interrupt_direction = 1.0f;
         }
       }
       m_nOldRot = 0;
@@ -53,6 +64,9 @@ private:
   int m_nValue;
   int aPinID;
   int bPinID;
+
+  int last_interrupt_time;
+  float last_interrupt_direction;
 
   float theta;
   float omega;

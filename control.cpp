@@ -25,6 +25,7 @@ constexpr float drive_check_omega = 0.5f;
 const std::array<Transform::StaticTransform<float>, 4> 
     wheel_frames{Params::lf_frame, Params::lb_frame, Params::rb_frame, Params::rf_frame};
 
+std::array<float, 4> last_wheel_anuglar_vel_error = {0.0f, 0.0f, 0.0f, 0.0f};
 int wheel_controller(
       int i,
       float dest_angular_vel,
@@ -35,15 +36,20 @@ int wheel_controller(
 
   float angular_vel_error = angular_vel - dest_angular_vel;
 
-  float omega_command = dest_angular_vel + (-Params::WheeFeedbackKp) * angular_vel_error;
+  float omega_command = dest_angular_vel 
+    + (-Params::WheelFeedbackKp) * angular_vel_error
+    + (-Params::WheelFeedbackKd) * (angular_vel_error - last_wheel_anuglar_vel_error[i]);
   float pwm = Params::pwm_per_omega[i] * omega_command;
-  if(omega_command > Params::omega_thresh){
-    pwm += Params::pwm0[i];
-  } else if(omega_command < -Params::omega_thresh){
-    pwm -= Params::pwm0[i];
+  if(omega_command > Params::WHEEL_FREE_THRESH_OMEGA){
+    float ratio = min(omega_command / Params::WHEEL_FAST_THRESH_OMEGA, 1.0f);
+    pwm += ratio * Params::pwm0[i];
+  } else if(omega_command < -Params::WHEEL_FREE_THRESH_OMEGA){
+    float ratio = min(-omega_command / Params::WHEEL_FAST_THRESH_OMEGA, 1.0f);
+    pwm -= ratio * Params::pwm0[i];
   } else{
     pwm = 0.0f;
   }
+  last_wheel_anuglar_vel_error[i] = angular_vel_error;
   return pwm;
 }
 
@@ -152,7 +158,7 @@ void control() {
     Serial.printf("%f %f %f %f %f\n", t,
         wheel_theta[0], wheel_theta[1], wheel_theta[2], wheel_theta[3]);
   }else if(mode == Mode::DriveCheck){
-    Params::WheeFeedbackKp = -4.0f;
+    Params::WheelFeedbackKp = -4.0f;
     int t = millis() / 1000;
     
     if(t%4 == 2){

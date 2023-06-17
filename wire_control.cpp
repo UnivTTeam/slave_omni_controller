@@ -6,20 +6,20 @@
 #include "device.h"
 #include "params.h"
 
-/*
 const char* SSID = "tk13a60d";           // WiFi SSID
 const char* PASSWORD = "hogepyon203";    // WiFi Password
 static const char *kRemoteIpadr = "192.168.255.36";
-*/
+/*
 const char* SSID = "toriyama_dell";           // WiFi SSID
 const char* PASSWORD = "chameleon";   // WiFi Password
 static const char *kRemoteIpadr = "192.168.137.1";
+*/
 
 static WiFiUDP wifiUdp; 
 static const int kRmoteUdpPort = 9000;
 
 const char SENSOR_JSON[] PROGMEM = 
-  R"=====({"t":%.2f,"pos_x":%.2f,"pos_y":%.2f,"theta":%.2f,"vx":%.2f,"vy":%.2f,"omega":%.2f})=====";
+  R"=====({"t":%.2f,"pos_x":%.2f,"pos_y":%.2f,"theta":%.2f,"vx":%.2f,"vy":%.2f,"omega":%.2f,"pwm0":%.1f,"pwm1":%.1f,"pwm2":%.1f,"pwm3":%.1f})=====";
 
 void setupWiFi()
 {
@@ -39,7 +39,8 @@ void sendWiFi()
   snprintf_P(payload, sizeof(payload), SENSOR_JSON, 
     t,
     SensorValue::x, SensorValue::y, SensorValue::theta,
-    TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel);
+    TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
+    CommandValue::wheel_pwm[0], CommandValue::wheel_pwm[1], CommandValue::wheel_pwm[2], CommandValue::wheel_pwm[3]);
   std::string msg_str = payload;
   uint8_t binary_array[sizeof(payload)];
   std::copy(msg_str.begin(), msg_str.end(), std::begin(binary_array));

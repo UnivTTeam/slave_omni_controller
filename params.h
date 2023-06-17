@@ -25,7 +25,8 @@ inline constexpr std::array<float, 4> max_wheel_anuglar_vel{
 // drive params
 inline const std::array<float, 4> pwm_per_omega = {4.325304242876692f, 4.30423987922306f, 4.505589196029983f, 5.290614211595727f};
 inline const std::array<float, 4> pwm0 = {37.46735839899752f, 38.63951379025713f, 34.25211616656666f, 9.516890077136148f};
-inline constexpr float omega_thresh = 50.0f / wheel_R;
+inline constexpr float WHEEL_FREE_THRESH_OMEGA = 50.0f / wheel_R;
+inline constexpr float WHEEL_FAST_THRESH_OMEGA = 200.0f / wheel_R;
 
 // マシン座標上のタイヤ位置(x, y, theta)
 inline const Transform::StaticTransform<float> lf_frame( 299.81f,  289.71f, 0.75 * M_PI);
@@ -40,7 +41,8 @@ inline constexpr std::array<bool, 4> reverse_wheel_enc{false, false, false, true
 #define USE_ENCODER_FULL_RESOLUTION
 
 // 制御パラメタ
-inline float WheeFeedbackKp = 4.0f;
+inline float WheelFeedbackKp = 4.0f;
+inline float WheelFeedbackKd = 4.0f;
 }
 
 #define ENC_LF 32

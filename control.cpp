@@ -15,7 +15,7 @@ enum class Mode {
   LoggerTest = 5,
 };
 
-Mode mode = Mode::LoggerTest;
+Mode mode = Mode::Normal;
 constexpr float device_check_pwm = 100.0f;
 constexpr int wheel_param_target_id = 3;
 constexpr float wheel_params_pwm = 200.0f;
@@ -183,6 +183,10 @@ void control() {
   }else if(mode == Mode::LoggerTest){
     SensorValue::x += 0.1f;
     SensorValue::y += 1.0f;
+
+    Serial.printf("%f %f %f %f %f %f \n",
+      SensorValue::x, SensorValue::y, SensorValue::theta,
+      TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel);
   }
   sendWiFi();
 }

@@ -27,17 +27,21 @@ std::array<int, 4> pwm_raw = {0, 0, 0, 0};
 }
 
 int getPwm(int i){
-  int pwm_raw = clipPwm(CommandValue::wheel_pwm[i], Params::reverse_wheel_motor[i]);
+  using Params::MAX_PWM_DIFF;
   int last_pwm = GetPwmInternalValue::pwm_raw[i];
-  int pwm = 0;
+  int max_pwm = last_pwm + MAX_PWM_DIFF;
+  int min_pwm = last_pwm - MAX_PWM_DIFF;
+
+  int pwm = clipPwm(CommandValue::wheel_pwm[i], Params::reverse_wheel_motor[i]);
 
   if(!TargetValue::emergency){
-    using Params::MAX_PWM_DIFF;
-    if(pwm > MAX_PWM_DIFF){
-      pwm = MAX_PWM_DIFF;
-    }else if(pwm < -MAX_PWM_DIFF){
-      pwm = -MAX_PWM_DIFF;
+    if(pwm > max_pwm){
+      pwm = max_pwm;
+    }else if(pwm < min_pwm){
+      pwm = min_pwm;
     }
+  }else{
+    pwm = 0;
   }
 
   GetPwmInternalValue::pwm_raw[i] = pwm;

@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include <WiFi.h>
+#include <Arduino.h>
 
 #include "wire_control.h"
 #include "device.h"
@@ -26,14 +27,14 @@ void setupWiFi()
   WiFi.begin(SSID, PASSWORD);
   while(WiFi.status() != WL_CONNECTED) {
     delay(500);  
-  }  
+  }
   wifiUdp.begin(kLocalPort);
 }
 
 void sendWiFi()
 {
   // 送信するデータを作成
-  char payload[255];
+  char payload[1000];
   float t = micros() / (1000.0f * 1000.0f);
   snprintf_P(payload, sizeof(payload), SENSOR_JSON, 
     t,
@@ -81,13 +82,13 @@ void receiveEvent(int cnt)
   if(Wire.available()>1){
     emergency = readBool();
     
-    vel_x = readFloatValue();
-    vel_y = readFloatValue();
-    angular_vel = readFloatValue();
-
     SensorValue::x = readFloatValue();
     SensorValue::y = readFloatValue();
     SensorValue::theta = readFloatValue();
+
+    vel_x = readFloatValue();
+    vel_y = readFloatValue();
+    angular_vel = readFloatValue();
   }
 }
 

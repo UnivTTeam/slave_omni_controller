@@ -13,7 +13,7 @@ enum class Mode {
   DriveCheck = 4,
 };
 
-Mode mode = Mode::Normal;
+Mode mode = Mode::DeviceCheck;
 constexpr float device_check_pwm = 100.0f;
 constexpr int wheel_param_target_id = 3;
 constexpr float wheel_params_pwm = 200.0f;

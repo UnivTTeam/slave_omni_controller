@@ -1,4 +1,5 @@
 #include<Wire.h>
+#include<Arduino.h>
 
 #include "wire_control.h"
 #include "device.h"

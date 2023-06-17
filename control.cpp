@@ -4,6 +4,7 @@
 #include "params.h"
 #include "device.h"
 #include "libwheels/transform2d/transform2d.hpp"
+#include "wire_control.h"
 
 enum class Mode {
   Normal = 0,
@@ -11,9 +12,10 @@ enum class Mode {
   DeviceCheck = 2,
   WheelParams = 3,
   DriveCheck = 4,
+  LoggerTest = 5,
 };
 
-Mode mode = Mode::DeviceCheck;
+Mode mode = Mode::LoggerTest;
 constexpr float device_check_pwm = 100.0f;
 constexpr int wheel_param_target_id = 3;
 constexpr float wheel_params_pwm = 200.0f;
@@ -178,5 +180,9 @@ void control() {
       t, TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
       wheel_pwm[0], wheel_pwm[1], wheel_pwm[2], wheel_pwm[3],
       wheel_omega[0], wheel_omega[1], wheel_omega[2], wheel_omega[3]);
+  }else if(mode == Mode::LoggerTest){
+    SensorValue::x += 0.1f;
+    SensorValue::y += 1.0f;
   }
+  sendWiFi();
 }

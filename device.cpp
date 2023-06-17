@@ -21,6 +21,29 @@ int clipPwm(int pwm, bool reverse)
     }
 }
 
+namespace GetPwmInternalValue {
+// この変数は getPWMからしか使わない
+std::array<int, 4> pwm_raw = {0, 0, 0, 0};
+}
+
+int getPwm(int i){
+  int pwm_raw = clipPwm(CommandValue::wheel_pwm[i], Params::reverse_wheel_motor[i]);
+  int last_pwm = GetPwmInternalValue::pwm_raw[i];
+  int pwm = 0;
+
+  if(!TargetValue::emergency){
+    using Params::MAX_PWM_DIFF;
+    if(pwm > MAX_PWM_DIFF){
+      pwm = MAX_PWM_DIFF;
+    }else if(pwm < -MAX_PWM_DIFF){
+      pwm = -MAX_PWM_DIFF;
+    }
+  }
+
+  GetPwmInternalValue::pwm_raw[i] = pwm;
+  return pwm;
+}
+
 //モーター系
 constexpr int LF_A = 17;
 constexpr int LF_B = 5;
@@ -31,18 +54,19 @@ constexpr int RB_B = 16;
 constexpr int RF_A = 15;
 constexpr int RF_B = 2;
 
-//状態
-namespace TargetValue{
-volatile int master_status = 0;//親機の状態
-}
-namespace CommandValue{
-volatile int slave_status = 0;//本機の状態
+// センサ系統
+namespace SensorValue{
+volatile float x = 0.0f;
+volatile float y = 0.0f;
+volatile float theta = 0.0f;
 }
 
+//状態
 namespace TargetValue{
 volatile float vel_x = 0.0f;
 volatile float vel_y = 0.0f;
 volatile float angular_vel = 0.0f;
+volatile bool emergency = true;
 }
 
 void setupDevice() {
@@ -105,7 +129,7 @@ void send_pwm(){
   int j = 0;
 
   for(int i=0; i<4; i++){
-    int pwm = clipPwm(CommandValue::wheel_pwm[i], Params::reverse_wheel_motor[i]);
+    int pwm = getPwm(i);
 
     if(pwm >= 0){
       ledcWrite(2*i, pwm);

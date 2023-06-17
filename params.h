@@ -14,6 +14,7 @@ inline constexpr float wheel_R = 51.0f; //mm,タイヤの半径
 inline constexpr float gear_d = 30.0f; //減速比
 inline constexpr float enc_cycle = 16.0f;//一周あたりの分解能
 inline constexpr int MAX_PWM = 250;
+inline constexpr int MAX_PWM_DIFF = 40;
 inline constexpr std::array<float, 4> max_wheel_anuglar_vel{
   6.5f * 2.0f * M_PI,
   6.5f * 2.0f * M_PI,

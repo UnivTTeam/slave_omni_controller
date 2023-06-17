@@ -2,10 +2,12 @@
 #include "encoder.h"
 #include "params.h"
 #include "control.h"
+#include "wire_control.h"
 
 void setup() {
   setupDevice();
-} 
+  setupWiFi();
+}
 
 constexpr float CONTROL_INTERVAL_US = Params::CONTROL_INTERVAL_MS * 1000.0f;
 

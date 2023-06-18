@@ -301,8 +301,8 @@ void auto_wheel_params()
       a[i] = ret[0];
       b[i] = ret[1];
     }
-    Serial.printf("inline const std::array<float, 4> pwm_per_omega = {%f, %f, %f, %f};", a[0], a[1], a[2], a[3]);
-    Serial.printf("inline const std::array<float, 4> pwm0 = {%f, %f, %f, %f};", b[0], b[1], b[2], b[3]);
+    Serial.printf("inline const std::array<float, 4> pwm_per_omega = {%f, %f, %f, %f};\n", a[0], a[1], a[2], a[3]);
+    Serial.printf("inline const std::array<float, 4> pwm0 = {%f, %f, %f, %f};\n\n", b[0], b[1], b[2], b[3]);
   }
   
 }

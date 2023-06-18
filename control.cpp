@@ -1,10 +1,12 @@
 #include <Arduino.h>
+#include <vector>
 
 #include "control.h"
 #include "params.h"
 #include "device.h"
 #include "libwheels/transform2d/transform2d.hpp"
 #include "wire_control.h"
+#include "fit.h"
 
 enum class Mode {
   Normal = 0,
@@ -13,6 +15,7 @@ enum class Mode {
   WheelParams = 3,
   DriveCheck = 4,
   LoggerTest = 5,
+  AutoWheelParams = 6,
 };
 
 Mode mode = Mode::Normal;
@@ -98,11 +101,17 @@ void drive(float vel_x, float vel_y, float angular_vel) {
   }
 }
 
+namespace AutoWheelParam {
+void auto_wheel_params();
+}
+
+float current_time = 0.0f;
 void control() {
   using namespace SensorValue;
   using CommandValue::wheel_pwm;
 
   wheel_pwm = std::array<float, 4>{{0.0f, 0.0f, 0.0f, 0.0f}};
+  current_time = micros() / (1000.0f * 1000.0f);
 
   if(mode == Mode::Normal){
     using namespace TargetValue;
@@ -193,6 +202,108 @@ void control() {
     Serial.printf("%f %f %f %f %f %f \n",
       SensorValue::x, SensorValue::y, SensorValue::theta,
       TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel);
+  }else if(mode == Mode::AutoWheelParams){
+    AutoWheelParam::auto_wheel_params();
   }
-  sendWiFi();
+
+  // ログ
+  if(mode != Mode::AutoWheelParams){
+    sendWiFi();    
+  }
 }
+
+namespace AutoWheelParam {
+constexpr float dT = 1.0f;
+constexpr float duration = 1.0f;
+const std::vector<float> pwms = {100.0f, 150.0f, 200.0f, -100.0f, -150.0f, -200.0f};
+void setPwm(float pwm){
+  for(int i=0; i<4; i++){
+    CommandValue::wheel_pwm[i] = pwm;
+  }
+}
+
+bool start = false;
+float t0 = 0.0f;
+std::array<float, 4> theta0{0.0f, 0.0f, 0.0f, 0.0f};
+std::array<std::vector<float>, 4> omega;
+int step = 0;
+float last_pwm = 0.0f;
+void auto_wheel_params()
+{
+  if(!start){
+    if(TargetValue::vel_x != 0.0f || TargetValue::vel_y != 0.0f){
+      start = true;
+      t0 = current_time;
+    }
+  }
+
+  for(int i=0; i<pwms.size(); i++){
+    if(step == 3*i){
+      float r = (current_time - t0) / dT;
+      if(r < 1.0f){
+        float pwm = last_pwm + r * (pwms[i] - last_pwm);
+        setPwm(pwm);
+      }else{
+        step++;
+        t0 = current_time;
+        last_pwm = pwms[i];
+      }
+    }
+    if(step == 3*i+1){
+      if(current_time - t0 < dT){
+        setPwm(pwms[i]);
+      }else{
+        step++;
+        t0 = current_time;
+        theta0 = SensorValue::wheel_theta;
+      }
+    }
+    if(step == 3*i+2){
+      float t = current_time - t0;
+      if(t < duration){
+        setPwm(pwms[i]);
+      }else{
+        step++;
+        t0 = current_time;
+        for(int i=0; i<4; i++){
+          omega[i].push_back((SensorValue::wheel_theta[i] - theta0[i]) / t;
+        }
+      }
+    }
+  }
+  if(step == 3 * pwms.size()){
+    float r = (current_time - t0) / dT;
+    if(r < 1.0f){
+      float pwm = (1.0f - r) * last_pwm;
+      setPwm(pwm);
+    }else{
+      setPwm(0.0f);
+    }
+  }
+
+  if(pwms.size() == omega.size()){
+    std::array<float, 4> a;
+    std::array<float, 4> b;
+    for(int i=0; i<4; i++){
+      std::vector<float> X;
+      std::vector<float> Y;
+      for(int j=0; j<pwms.size(); j++){
+        float x = pwms[j];
+        float y = omega[j];
+        if(x < 0.0f){
+          x = -x;
+          y = -y;
+        }
+        X.push_back(x);
+        Y.push_back(y);
+      }
+      auto ret = fit(Y, X);
+      a[i] = ret[0];
+      b[i] = ret[1];
+    }
+    Serial.printf("inline const std::array<float, 4> pwm_per_omega = {%f, %f, %f, %f};", a[0], a[1], a[2], a[3]);
+    Serial.printf("inline const std::array<float, 4> pwm0 = {%f, %f, %f, %f};", b[0], b[1], b[2], b[3]);
+  }
+  
+}
+} // namespace AutoWheelParam

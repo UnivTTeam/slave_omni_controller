@@ -9,6 +9,8 @@
 #include "libwheels/transform2d/transform2d.hpp"
 #include "wire_control.h"
 
+using Params::current_time;
+
 enum class Mode {
   Normal = 0,
   SensorCheck = 1,
@@ -22,7 +24,7 @@ enum class Mode {
 Mode mode = Mode::Normal;
 constexpr float device_check_pwm = 100.0f;
 constexpr int wheel_param_target_id = 3;
-constexpr float wheel_params_pwm = 200.0f;
+constexpr float wheel_params_pwm = 80.0f;
 constexpr float drive_check_vel = 100.0f;
 constexpr float drive_check_omega = 0.5f;
 
@@ -109,13 +111,11 @@ namespace AutoWheelParam {
 void auto_wheel_params();
 }
 
-float current_time = 0.0f;
 void control() {
   using namespace SensorValue;
   using CommandValue::wheel_pwm;
 
   wheel_pwm = std::array<float, 4>{{0.0f, 0.0f, 0.0f, 0.0f}};
-  current_time = micros() / (1000.0f * 1000.0f);
 
   if(mode == Mode::Normal){
     using namespace TargetValue;
@@ -195,8 +195,9 @@ void control() {
         drive(0.0f, 0.0f, -drive_check_omega);
       } 
     }
-    Serial.printf("t: %d vx: %f vy: %f om: %f pwm: %f %f %f %f wheel_omega: %f %f %f %f\n", 
-      t, TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
+    Serial.printf("t: %d emg:%s vx: %f vy: %f om: %f pwm: %f %f %f %f wheel_omega: %f %f %f %f\n", 
+      t, (TargetValue::emergency ? "true" : "false"),
+      TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
       wheel_pwm[0], wheel_pwm[1], wheel_pwm[2], wheel_pwm[3],
       wheel_omega[0], wheel_omega[1], wheel_omega[2], wheel_omega[3]);
   }else if(mode == Mode::LoggerTest){
@@ -207,6 +208,7 @@ void control() {
       SensorValue::x, SensorValue::y, SensorValue::theta,
       TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel);
   }else if(mode == Mode::AutoWheelParams){
+    TargetValue::emergency = false;
     AutoWheelParam::auto_wheel_params();
   }
 
@@ -265,9 +267,11 @@ float last_pwm = 0.0f;
 void auto_wheel_params()
 {
   if(!start){
+    Serial.printf("auto wheel waiting...\n");
     if(TargetValue::vel_x != 0.0f || TargetValue::vel_y != 0.0f){
       start = true;
       t0 = current_time;
+      Serial.printf("auto wheel start\n");
     }
   }
 
@@ -317,6 +321,7 @@ void auto_wheel_params()
         setPwm(0.0f);
       }
     }
+    Serial.printf("step: %d\n", step);
   }
 
   if(pwms.size() == omegas.size()){

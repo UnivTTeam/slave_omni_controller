@@ -21,6 +21,10 @@ void loop() {
     // 時刻情報アップデート
     last_control_time_us = current_time_us;
     Params::control_interval_sec = interval_us / (1000.0f * 1000.0f);
+    Params::current_time = current_time_us / (1000.0f * 1000.0f);
+    if(Params::last_communication_time + Params::MASTER_TIMEOUT_SEC < Params::current_time){
+      TargetValue::emergency = true;
+    }
 
     // デバイス情報アップデート
     calc_wheel_ang_vel();

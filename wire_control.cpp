@@ -6,8 +6,6 @@
 #include "device.h"
 #include "params.h"
 
-bool enable_wifi = false;
-
 const char* SSID = "tk13a60d";           // WiFi SSID
 const char* PASSWORD = "hogepyon203";    // WiFi Password
 static const char *kRemoteIpadr = "192.168.255.36";
@@ -80,6 +78,8 @@ void receiveEvent(int cnt)
 {
   using namespace TargetValue;
   if(Wire.available()>1){
+    Params::last_communication_time = Params::current_time;
+
     emergency = readBool();
     
     SensorValue::x = readFloatValue();

@@ -6,6 +6,8 @@
 #include "device.h"
 #include "params.h"
 
+bool enable_wifi = false;
+
 const char* SSID = "tk13a60d";           // WiFi SSID
 const char* PASSWORD = "hogepyon203";    // WiFi Password
 static const char *kRemoteIpadr = "192.168.255.36";
@@ -25,9 +27,6 @@ void setupWiFi()
 {
   static const int kLocalPort = 7000;
   WiFi.begin(SSID, PASSWORD);
-  while(WiFi.status() != WL_CONNECTED) {
-    delay(500);  
-  }
   wifiUdp.begin(kLocalPort);
 }
 

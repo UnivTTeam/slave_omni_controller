@@ -24,6 +24,9 @@ void loop() {
     Params::current_time = current_time_us / (1000.0f * 1000.0f);
     if(Params::last_communication_time + Params::MASTER_TIMEOUT_SEC < Params::current_time){
       TargetValue::emergency = true;
+      digitalWrite(Params::LED, LOW);
+    }else{
+      digitalWrite(Params::LED, HIGH);
     }
 
     // デバイス情報アップデート

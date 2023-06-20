@@ -6,14 +6,14 @@
 #include "device.h"
 #include "params.h"
 
-const char* SSID = "tk13a60d";           // WiFi SSID
-const char* PASSWORD = "hogepyon203";    // WiFi Password
-static const char *kRemoteIpadr = "192.168.255.36";
-/*
+//const char* SSID = "tk13a60d";           // WiFi SSID
+//const char* PASSWORD = "hogepyon203";    // WiFi Password
+//static const char *kRemoteIpadr = "192.168.255.36";
+
 const char* SSID = "toriyama_dell";           // WiFi SSID
 const char* PASSWORD = "chameleon";   // WiFi Password
 static const char *kRemoteIpadr = "192.168.137.1";
-*/
+
 
 static WiFiUDP wifiUdp; 
 static const int kRmoteUdpPort = 9000;

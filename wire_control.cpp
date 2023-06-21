@@ -19,7 +19,7 @@ static WiFiUDP wifiUdp;
 static const int kRmoteUdpPort = 9000;
 
 const char SENSOR_JSON[] PROGMEM = 
-  R"=====({"t":%.2f,"pos_x":%.2f,"pos_y":%.2f,"theta":%.2f,"vx":%.2f,"vy":%.2f,"omega":%.2f,"pwm0":%.1f,"pwm1":%.1f,"pwm2":%.1f,"pwm3":%.1f})=====";
+  R"=====({"t":%.2f,"pos_x":%.2f,"pos_y":%.2f,"theta":%.2f,"vx":%.2f,"vy":%.2f,"omega":%.2f,"pwm0":%.1f,"pwm1":%.1f,"pwm2":%.1f,"pwm3":%.1f,"omega0":%.1f,"omega1":%.1f,"omega2":%.1f,"omega3":%.1f})=====";
 
 void setupWiFi()
 {
@@ -37,7 +37,8 @@ void sendWiFi()
     t,
     SensorValue::x, SensorValue::y, SensorValue::theta,
     TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
-    CommandValue::wheel_pwm[0], CommandValue::wheel_pwm[1], CommandValue::wheel_pwm[2], CommandValue::wheel_pwm[3]);
+    CommandValue::wheel_pwm[0], CommandValue::wheel_pwm[1], CommandValue::wheel_pwm[2], CommandValue::wheel_pwm[3],
+    SensorValue::wheel_omega[0], SensorValue::wheel_omega[1], SensorValue::wheel_omega[], SensorValue::wheel_omega[3]);
   std::string msg_str = payload;
   uint8_t binary_array[sizeof(payload)];
   std::copy(msg_str.begin(), msg_str.end(), std::begin(binary_array));

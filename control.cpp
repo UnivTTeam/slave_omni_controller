@@ -21,7 +21,7 @@ enum class Mode {
   AutoWheelParams = 6,
 };
 
-Mode mode = Mode::Normal;
+Mode mode = Mode::AutoWheelParams;
 constexpr float device_check_pwm = 100.0f;
 constexpr int wheel_param_target_id = 3;
 constexpr float wheel_params_pwm = 80.0f;

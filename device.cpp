@@ -77,6 +77,10 @@ void setupDevice() {
   Wire.begin(uint8_t(OMNI_ID));
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
+
+  pinMode(Params::LED, OUTPUT);
+  digitalWrite(Params::LED, LOW);
+
   
   Serial.begin(115200);
   // 使用するタイマーのチャネルと周波数を設定

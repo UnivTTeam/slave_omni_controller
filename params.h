@@ -43,6 +43,9 @@ inline constexpr std::array<bool, 4> reverse_wheel_enc{false, false, false, true
 
 #define USE_ENCODER_FULL_RESOLUTION
 
+// LED
+inline constexpr int LED = 23;
+
 // 制御パラメタ
 inline float WheelFeedbackKp = 8.0f;
 inline float WheelFeedbackKd = 8.0f;

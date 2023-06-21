@@ -24,9 +24,11 @@ inline constexpr std::array<float, 4> max_wheel_anuglar_vel{
 };
 
 // drive params
-inline const std::array<float, 4> pwm_per_omega = {4.377292f, 4.372072f, 4.487340f, 5.352004f};
 inline constexpr float pwm0_offset = 30.0f;
+inline const std::array<float, 4> pwm_per_omega = {4.377292f, 4.372072f, 4.487340f, 5.352004f};
 inline const std::array<float, 4> pwm0 = {39.426388f+pwm0_offset, 32.658947f+pwm0_offset, 32.848671f+pwm0_offset, 7.160605f+pwm0_offset};
+//inline const std::array<float, 4> pwm_per_omega = {4.299337f, 4.319582f, 4.284655f, 5.238786f};
+//inline const std::array<float, 4> pwm0 = {39.494526f, 33.285480f, 33.540165f, 7.909118f};
 
 inline constexpr float WHEEL_FREE_THRESH_OMEGA = 50.0f / wheel_R;
 inline constexpr float WHEEL_FAST_THRESH_OMEGA = 200.0f / wheel_R;

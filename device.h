@@ -18,6 +18,8 @@ extern volatile float vel_x;
 extern volatile float vel_y;
 extern volatile float angular_vel;
 extern volatile bool emergency;
+
+extern volatile int master_step;
 }
 
 // 子機のプログラムでは書き込む変数

@@ -71,6 +71,8 @@ volatile float vel_x = 0.0f;
 volatile float vel_y = 0.0f;
 volatile float angular_vel = 0.0f;
 volatile bool emergency = true;
+
+volatile int master_step = -1;
 }
 
 void setupDevice() {

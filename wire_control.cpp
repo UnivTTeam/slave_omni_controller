@@ -6,7 +6,7 @@
 #include "device.h"
 #include "params.h"
 
-const char* SSID = "SEKKEN-DYNABOOK 9513";           // WiFi SSID
+const char* SSID = "SekkenDynabook";           // WiFi SSID
 const char* PASSWORD = "446c6*S5";    // WiFi Password
 static const char *kRemoteIpadr = "192.168.137.1";
 
@@ -14,12 +14,13 @@ static const char *kRemoteIpadr = "192.168.137.1";
 // const char* PASSWORD = "chameleon";   // WiFi Password
 // static const char *kRemoteIpadr = "192.168.137.1";
 
-
 static WiFiUDP wifiUdp; 
 static const int kRmoteUdpPort = 9000;
 
+//const char SENSOR_JSON[] PROGMEM = 
+//  R"=====({"t":%.2f,"s":%d,"x":%.2f,"y":%.2f,"T":%.4f,"X":%.2f,"Y":%.2f,"O":%.4f,"P":%.2f,"Q":%.2f,"R":%.2f,"S":%.2f,"A":%.2f,"B":%.2f,"C":%.2f,"D":%.2f})=====";
 const char SENSOR_JSON[] PROGMEM = 
-  R"=====({"t":%.2f,"s":%d,"x":%.2f,"y":%.2f,"th":%.5f,"vx":%.2f,"vy":%.2f,"om":%.5f,"p0":%.2f,"p1":%.2f,"p2":%.2f,"p3":%.2f,"om0":%.2f,"om1":%.2f,"om2":%.2f,"om3":%.2f})=====";
+ R"=====({"t":%.2f,"s":%d,"x":%.2f,"y":%.2f,"T":%.4f,"X":%.2f,"Y":%.2f,"O":%.4f,"A":%.2f,"B":%.2f,"C":%.2f,"D":%.2f})=====";
 
 void setupWiFi()
 {
@@ -31,13 +32,13 @@ void setupWiFi()
 void sendWiFi()
 {
   // 送信するデータを作成
-  char payload[1000];
+  char payload[500];
   float t = micros() / (1000.0f * 1000.0f);
   snprintf_P(payload, sizeof(payload), SENSOR_JSON, 
     t, TargetValue::master_step,
     SensorValue::x, SensorValue::y, SensorValue::theta,
     TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
-    CommandValue::wheel_pwm[0], CommandValue::wheel_pwm[1], CommandValue::wheel_pwm[2], CommandValue::wheel_pwm[3],
+    //CommandValue::wheel_pwm[0], CommandValue::wheel_pwm[1], CommandValue::wheel_pwm[2], CommandValue::wheel_pwm[3],
     SensorValue::wheel_omega[0], SensorValue::wheel_omega[1], SensorValue::wheel_omega[2], SensorValue::wheel_omega[3]);
   std::string msg_str = payload;
   uint8_t binary_array[sizeof(payload)];

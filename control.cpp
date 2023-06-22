@@ -258,7 +258,7 @@ void setPwm(float pwm){
   }
 }
 
-bool start = false;
+bool start = true;
 float t0 = 0.0f;
 std::array<float, 4> theta0{0.0f, 0.0f, 0.0f, 0.0f};
 std::vector<std::array<float, 4>> omegas;
@@ -345,7 +345,7 @@ void auto_wheel_params()
       b[i] = ret[1];
     }
     Serial.printf("inline const std::array<float, 4> pwm_per_omega = {%ff, %ff, %ff, %ff};\n", a[0], a[1], a[2], a[3]);
-    Serial.printf("inline const std::array<float, 4> pwm0 = {%ff, %ff, %ff, %ff};\n\n", b[0], b[1], b[2], b[3]);
+    Serial.printf("inline const std::array<float, 4> pwm0 = {%ff+pwm0_offset, %ff+pwm0_offset, %ff+pwm0_offset, %ff+pwm0_offset};\n\n", b[0], b[1], b[2], b[3]);
   }
 }
 } // namespace AutoWheelParam

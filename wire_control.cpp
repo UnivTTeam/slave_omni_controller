@@ -20,7 +20,7 @@ static const int kRmoteUdpPort = 9000;
 //const char SENSOR_JSON[] PROGMEM = 
 //  R"=====({"t":%.2f,"s":%d,"x":%.2f,"y":%.2f,"T":%.4f,"X":%.2f,"Y":%.2f,"O":%.4f,"P":%.2f,"Q":%.2f,"R":%.2f,"S":%.2f,"A":%.2f,"B":%.2f,"C":%.2f,"D":%.2f})=====";
 const char SENSOR_JSON[] PROGMEM = 
- R"=====({"t":%.2f,"s":%d,"x":%.2f,"y":%.2f,"T":%.4f,"X":%.2f,"Y":%.2f,"O":%.4f,"A":%.2f,"B":%.2f,"C":%.2f,"D":%.2f})=====";
+ R"=====({"t":%.2f,"step":%d,"x":%.2f,"y":%.2f,"theta":%.4f,"vx":%.2f,"vy":%.2f,"omega":%.4f})=====";
 
 void setupWiFi()
 {
@@ -32,14 +32,15 @@ void setupWiFi()
 void sendWiFi()
 {
   // 送信するデータを作成
-  char payload[500];
+  char payload[1000];
   float t = micros() / (1000.0f * 1000.0f);
   snprintf_P(payload, sizeof(payload), SENSOR_JSON, 
     t, TargetValue::master_step,
     SensorValue::x, SensorValue::y, SensorValue::theta,
-    TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel,
+    TargetValue::vel_x, TargetValue::vel_y, TargetValue::angular_vel
     //CommandValue::wheel_pwm[0], CommandValue::wheel_pwm[1], CommandValue::wheel_pwm[2], CommandValue::wheel_pwm[3],
-    SensorValue::wheel_omega[0], SensorValue::wheel_omega[1], SensorValue::wheel_omega[2], SensorValue::wheel_omega[3]);
+    //SensorValue::wheel_omega[0], SensorValue::wheel_omega[1], SensorValue::wheel_omega[2], SensorValue::wheel_omega[3]
+  );
   std::string msg_str = payload;
   uint8_t binary_array[sizeof(payload)];
   std::copy(msg_str.begin(), msg_str.end(), std::begin(binary_array));

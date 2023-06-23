@@ -348,4 +348,5 @@ void auto_wheel_params()
     Serial.printf("inline const std::array<float, 4> pwm0 = {%ff+pwm0_offset, %ff+pwm0_offset, %ff+pwm0_offset, %ff+pwm0_offset};\n\n", b[0], b[1], b[2], b[3]);
   }
 }
+
 } // namespace AutoWheelParam
